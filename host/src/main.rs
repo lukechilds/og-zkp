@@ -97,6 +97,12 @@ fn serialize_receipt(receipt: &Receipt) -> String {
     bech32::encode::<Bech32m>(hrp, &receipt_bytes).unwrap()
 }
 
+fn deserialize_receipt(receipt: &str) -> Receipt {
+    let (_hrp, receipt_bytes) = bech32::decode(receipt).unwrap();
+    let receipt: Receipt = bincode::deserialize(&receipt_bytes).unwrap();
+    receipt
+}
+
 #[tokio::main]
 async fn main() {
     println!("og-zkp");
@@ -162,9 +168,10 @@ async fn main() {
         .receipt;
 
     // Serialize the receipt and print as bech32m
+    let serialized_receipt = serialize_receipt(&receipt);
     println!();
     println!("Receipt");
-    println!("{}", serialize_receipt(&receipt));
+    println!("{}", serialized_receipt);
 
     // Verify correct data commitments in the receipt journal.
     let receipt_output: String = receipt.journal.decode().unwrap();
@@ -173,5 +180,7 @@ async fn main() {
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
-    receipt.verify(OGZKP_ID).unwrap();
+    deserialize_receipt(&serialized_receipt)
+        .verify(OGZKP_ID)
+        .unwrap();
 }
