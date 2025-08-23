@@ -18,12 +18,15 @@ struct TxShort {
     txid: String,
 }
 
+const MEMPOOL_API: &str = "https://mempool.space/api";
+
 async fn fetch_txids(
+    endpoint: &str,
     address: &str,
     after_txid: Option<&str>,
 ) -> Result<Vec<String>, reqwest::Error> {
     // Build the URL
-    let mut url = format!("https://mempool.space/api/address/{}/txs", address);
+    let mut url = format!("{}/address/{}/txs", endpoint, address);
     if let Some(cursor) = after_txid {
         url.push_str(&format!("?after_txid={}", cursor));
     }
@@ -44,11 +47,14 @@ async fn fetch_txids(
     Ok(txs.into_iter().map(|t| t.txid).collect())
 }
 
-async fn find_first_seen_txid(address: &str) -> Result<Option<String>, reqwest::Error> {
+async fn find_first_seen_txid(
+    endpoint: &str,
+    address: &str,
+) -> Result<Option<String>, reqwest::Error> {
     // Walk pages using the second-to-last txid as the cursor until only one remains
     let mut after_txid = None;
     loop {
-        let txids = fetch_txids(address, after_txid.as_deref()).await?;
+        let txids = fetch_txids(endpoint, address, after_txid.as_deref()).await?;
 
         // If no txids, return None
         if txids.is_empty() {
@@ -61,21 +67,25 @@ async fn find_first_seen_txid(address: &str) -> Result<Option<String>, reqwest::
         }
 
         // Set the cursor to the second-to-last txid
-        after_txid = Some(txids[txids.len() - 2].clone());
+        let next_txid = Some(txids[txids.len() - 2].clone());
+        if next_txid == after_txid {
+            panic!("This instance of the mempool API does not support pagination");
+        }
+        after_txid = next_txid;
     }
 }
 
-async fn fetch_spv_proof(txid: &str) -> Result<String, reqwest::Error> {
+async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String, reqwest::Error> {
     let client = reqwest::Client::new();
-    let url = format!("https://mempool.space/api/tx/{}/merkleblock-proof", txid);
+    let url = format!("{}/tx/{}/merkleblock-proof", endpoint, txid);
     let resp = client.get(url).send().await?;
     let proof: String = resp.text().await?;
     Ok(proof)
 }
 
-async fn fetch_raw_tx(txid: &str) -> Result<String, reqwest::Error> {
+async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String, reqwest::Error> {
     let client = reqwest::Client::new();
-    let url = format!("https://mempool.space/api/tx/{}/hex", txid);
+    let url = format!("{}/tx/{}/hex", endpoint, txid);
     let resp = client.get(url).send().await?;
     let tx: String = resp.text().await?;
     Ok(tx)
@@ -114,7 +124,7 @@ async fn main() {
 
     // Lookup first-seen txid for this address
     println!("Looking up first-seen txid for address...");
-    let txid = match find_first_seen_txid(&address.to_string()).await {
+    let txid = match find_first_seen_txid(MEMPOOL_API, &address.to_string()).await {
         Ok(Some(txid)) => txid,
         Ok(None) => {
             println!("No transactions found for address! Exiting...");
@@ -128,11 +138,11 @@ async fn main() {
     println!("First seen txid: {}", txid);
 
     println!("Fetching raw tx...");
-    let tx = fetch_raw_tx(&txid).await.unwrap();
+    let tx = fetch_raw_tx(MEMPOOL_API, &txid).await.unwrap();
     println!("Raw tx: {}", tx);
 
     println!("Fetching SPV proof for txid...");
-    let spv_proof = fetch_spv_proof(&txid).await.unwrap();
+    let spv_proof = fetch_spv_proof(MEMPOOL_API, &txid).await.unwrap();
     println!("SPV proof: {}", spv_proof);
 
     // Create an executor environment and pass in the input.
