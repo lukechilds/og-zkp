@@ -4,6 +4,7 @@ use methods::{OGZKP_ELF, OGZKP_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, ReceiptKind};
 
 use base64::prelude::*;
+use bincode;
 
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -41,14 +42,17 @@ fn main() {
         .receipt;
     // let receipt = prover.prove(env, OGZKP_ELF).unwrap().receipt;
 
-    // TODO: Serialize the receipt to bytes and dump them
+    // Serialize the receipt and print as base64
+    let receipt_bytes = bincode::serialize(&receipt).unwrap();
+    let receipt_b64 = BASE64_STANDARD.encode(receipt_bytes);
     println!();
-    println!("{:?}", receipt);
+    println!("Receipt");
+    println!("{}", receipt_b64);
 
     // Verify correct data commitments in the receipt journal.
     let receipt_output: String = receipt.journal.decode().unwrap();
     println!();
-    println!("receipt_output: {:?}", receipt_output);
+    println!("Commitment: {:?}", receipt_output);
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
