@@ -19,7 +19,6 @@ struct TxShort {
 }
 
 async fn fetch_txids(
-    client: &reqwest::Client,
     address: &str,
     after_txid: Option<&str>,
 ) -> Result<Vec<String>, reqwest::Error> {
@@ -30,6 +29,7 @@ async fn fetch_txids(
     }
 
     // Send the request
+    let client = reqwest::Client::new();
     let resp = client
         .get(url)
         .header("accept", "application/json")
@@ -46,10 +46,9 @@ async fn fetch_txids(
 
 async fn find_first_seen_txid(address: &str) -> Result<Option<String>, reqwest::Error> {
     // Walk pages using the second-to-last txid as the cursor until only one remains
-    let client = reqwest::Client::new();
     let mut after_txid = None;
     loop {
-        let txids = fetch_txids(&client, address, after_txid.as_deref()).await?;
+        let txids = fetch_txids(address, after_txid.as_deref()).await?;
 
         // If no txids, return None
         if txids.is_empty() {
