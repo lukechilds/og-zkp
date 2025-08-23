@@ -15,3 +15,15 @@ pub fn recover_pubkey_from_bitcoin_signed_message(
 
     Ok(pubkey)
 }
+
+use time::{Date, OffsetDateTime};
+pub fn start_of_month(unix_ts: u32) -> u32 {
+    let ts = OffsetDateTime::from_unix_timestamp(unix_ts.into()).unwrap();
+
+    let date = Date::from_calendar_date(ts.year(), ts.month(), 1).unwrap();
+
+    date.with_hms(0, 0, 0)
+        .unwrap()
+        .assume_utc()
+        .unix_timestamp() as u32
+}

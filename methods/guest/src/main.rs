@@ -1,5 +1,7 @@
 use bitcoin::{consensus, script::ScriptBuf, MerkleBlock, Transaction, Txid};
-use ogzkp_core::{recover_pubkey_from_bitcoin_signed_message, OGZKP_MESSAGE_PREFIX};
+use ogzkp_core::{
+    recover_pubkey_from_bitcoin_signed_message, start_of_month, OGZKP_MESSAGE_PREFIX,
+};
 use risc0_zkvm::guest::env;
 
 fn main() {
@@ -45,11 +47,11 @@ fn main() {
 
     // TODO: assert block inclusion proof is valid for header merkle root
 
-    // TODO: commit time from block header (rounded down to some interval)
+    // Calculate the time of the start of the calender month the block was mined
+    let block_time = spv_proof.header.time;
+    let block_month = start_of_month(block_time).to_string();
 
-    // Strip prefix from message
-    let output = message.strip_prefix(OGZKP_MESSAGE_PREFIX).unwrap();
-
-    // Commit output to the journal
+    // Commit to the month and the message
+    let output = block_month + " " + message.strip_prefix(OGZKP_MESSAGE_PREFIX).unwrap();
     env::commit(&output);
 }
