@@ -40,7 +40,6 @@ fn main() {
         .prove_with_opts(env, OGZKP_ELF, &opts)
         .unwrap()
         .receipt;
-    // let receipt = prover.prove(env, OGZKP_ELF).unwrap().receipt;
 
     // Serialize the receipt and print as base64
     let receipt_bytes = bincode::serialize(&receipt).unwrap();
