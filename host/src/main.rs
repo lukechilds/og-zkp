@@ -64,6 +64,22 @@ async fn find_first_seen_txid(address: &str) -> Result<Option<String>, reqwest::
     }
 }
 
+async fn fetch_spv_proof(txid: &str) -> Result<String, reqwest::Error> {
+    let client = reqwest::Client::new();
+    let url = format!("https://mempool.space/api/tx/{}/merkleblock-proof", txid);
+    let resp = client.get(url).send().await?;
+    let proof: String = resp.text().await?;
+    Ok(proof)
+}
+
+async fn fetch_raw_tx(txid: &str) -> Result<String, reqwest::Error> {
+    let client = reqwest::Client::new();
+    let url = format!("https://mempool.space/api/tx/{}/hex", txid);
+    let resp = client.get(url).send().await?;
+    let tx: String = resp.text().await?;
+    Ok(tx)
+}
+
 #[tokio::main]
 async fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -109,8 +125,16 @@ async fn main() {
     };
     println!("First seen txid: {}", txid);
 
+    println!("Fetching raw tx...");
+    let tx = fetch_raw_tx(&txid).await.unwrap();
+    println!("Raw tx: {}", tx);
+
+    println!("Fetching SPV proof for txid...");
+    let spv_proof = fetch_spv_proof(&txid).await.unwrap();
+    println!("SPV proof: {}", spv_proof);
+
     // Create an executor environment and pass in the input.
-    let input = (message, signature_bytes);
+    let input = (message, signature_bytes, tx, spv_proof);
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()

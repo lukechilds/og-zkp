@@ -3,7 +3,8 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     // Read the input
-    let (message, signature_bytes): (String, Vec<u8>) = env::read();
+    let (message, signature_bytes, _tx, _spv_proof): (String, Vec<u8>, String, String) =
+        env::read();
 
     // Assert message starts with "og-zkp"
     assert!(
