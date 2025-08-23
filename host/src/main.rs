@@ -9,8 +9,63 @@ use bitcoin::{Address, Network};
 
 use base64::prelude::*;
 use bincode;
+use serde::Deserialize;
 
-fn main() {
+#[derive(Deserialize)]
+struct TxShort {
+    txid: String,
+}
+
+async fn fetch_txids(
+    client: &reqwest::Client,
+    address: &str,
+    after_txid: Option<&str>,
+) -> Result<Vec<String>, reqwest::Error> {
+    // Build the URL
+    let mut url = format!("https://mempool.space/api/address/{}/txs", address);
+    if let Some(cursor) = after_txid {
+        url.push_str(&format!("?after_txid={}", cursor));
+    }
+
+    // Send the request
+    let resp = client
+        .get(url)
+        .header("accept", "application/json")
+        .send()
+        .await?
+        .error_for_status()?;
+
+    // Parse the response
+    let txs: Vec<TxShort> = resp.json().await?;
+
+    // Return the txids
+    Ok(txs.into_iter().map(|t| t.txid).collect())
+}
+
+async fn find_first_seen_txid(address: &str) -> Result<Option<String>, reqwest::Error> {
+    // Walk pages using the second-to-last txid as the cursor until only one remains
+    let client = reqwest::Client::new();
+    let mut after_txid = None;
+    loop {
+        let txids = fetch_txids(&client, address, after_txid.as_deref()).await?;
+
+        // If no txids, return None
+        if txids.is_empty() {
+            return Ok(None);
+        }
+
+        // If there's only one txid, we have the first seen tx
+        if txids.len() == 1 {
+            return Ok(Some(txids[0].clone()));
+        }
+
+        // Set the cursor to the second-to-last txid
+        after_txid = Some(txids[txids.len() - 2].clone());
+    }
+}
+
+#[tokio::main]
+async fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
@@ -38,6 +93,21 @@ fn main() {
     // Derive P2PKH address from pubkey
     let address = Address::p2pkh(&pubkey, Network::Bitcoin);
     println!("Extracted P2PKH address: {}", address);
+
+    // Lookup first-seen txid for this address
+    println!("Looking up first-seen txid for address...");
+    let txid = match find_first_seen_txid(&address.to_string()).await {
+        Ok(Some(txid)) => txid,
+        Ok(None) => {
+            println!("No transactions found for address! Exiting...");
+            return;
+        }
+        Err(e) => {
+            eprintln!("Failed to fetch transactions: {}", e);
+            return;
+        }
+    };
+    println!("First seen txid: {}", txid);
 
     // Create an executor environment and pass in the input.
     let input = (message, signature_bytes);
