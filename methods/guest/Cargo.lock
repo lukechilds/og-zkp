@@ -855,6 +855,7 @@ name = "ogzkp"
 version = "0.1.0"
 dependencies = [
  "bitcoin",
+ "hex",
  "ogzkp-core",
  "risc0-zkvm",
 ]
