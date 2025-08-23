@@ -47,7 +47,7 @@ fn main() {
 
     // TODO: assert block inclusion proof is valid for header merkle root
 
-    // Calculate the time of the start of the calender month the block was mined
+    // Calculate the time of the start of the calender month the tx was confirmed in
     let block_time = spv_proof.header.time;
     let block_month = start_of_month(block_time).to_string();
 
