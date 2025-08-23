@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 bitcoin = { version = "0.32.7", default-features = false, features = ["secp-recovery"] }
-risc0-zkvm = { version = "^2.3.1", default-features = false, features = ['std'] }
+risc0-zkvm = { version = "^3.0.1", default-features = false, features = ['std'] }
