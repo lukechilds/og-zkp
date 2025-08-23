@@ -3,6 +3,10 @@
 use methods::{OGZKP_ELF, OGZKP_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, ReceiptKind};
 
+use ogzkp_core::recover_pubkey_from_bitcoin_signed_message;
+
+use bitcoin::{Address, Network};
+
 use base64::prelude::*;
 use bincode;
 
@@ -24,8 +28,18 @@ fn main() {
     println!("message: {}", message);
     println!("signature: {}", signature);
 
-    // Create an executor environment and pass in the input.
+    // Decode the base64 signature
     let signature_bytes = BASE64_STANDARD.decode(signature).unwrap();
+
+    // Recover pubkey from the signed message
+    let pubkey = recover_pubkey_from_bitcoin_signed_message(&signature_bytes, &message)
+        .expect("Failed to recover pubkey from bitcoin signed message");
+
+    // Derive P2PKH address from pubkey
+    let address = Address::p2pkh(&pubkey, Network::Bitcoin);
+    println!("Extracted P2PKH address: {}", address);
+
+    // Create an executor environment and pass in the input.
     let input = (message, signature_bytes);
     let env = ExecutorEnv::builder()
         .write(&input)

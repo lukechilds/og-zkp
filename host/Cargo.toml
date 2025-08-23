@@ -10,3 +10,5 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 serde = "1.0"
 base64 = "0.22.1"
 bincode = "1"
+ogzkp-core = { path = "../core" }
+bitcoin = "0.32.7"
