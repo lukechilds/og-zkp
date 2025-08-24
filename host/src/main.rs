@@ -21,12 +21,12 @@ use bitcoin::consensus;
 use bitcoin::hashes::Hash as _;
 use bitcoin::MerkleBlock;
 
+use clap::{Parser, Subcommand};
+
 #[derive(Deserialize)]
 struct TxShort {
     txid: String,
 }
-
-const MEMPOOL_API: &str = "https://mempool.space/api";
 
 async fn fetch_txids(
     endpoint: &str,
@@ -116,19 +116,8 @@ fn deserialize_receipt(receipt: &str) -> Receipt {
     bincode::deserialize(&decompressed).unwrap()
 }
 
-#[tokio::main]
-async fn main() {
+async fn prove_command(message: &str, signature: &str, mempool_api: &str) {
     println!("og-zkp");
-
-    // User input
-    // 1LukeQU5jwebXbMLDVydeH4vFSobRV9rkj
-    let message = "og-zkp x.com/lukechilds";
-    let signature =
-        "HE6QfyPFmJvCGjWohZYAVa+pbdSRjeQpdNbXp6zNbDCnEN65xmK+WYidKlt6J1E/GDJpmLcatjEazVo5wqOg6wM=";
-    println!();
-    println!("Inputs");
-    println!("message: {}", message);
-    println!("signature: {}", signature);
 
     // Decode the base64 signature
     let signature_bytes = BASE64_STANDARD.decode(signature).unwrap();
@@ -143,7 +132,7 @@ async fn main() {
 
     // Lookup first-seen txid for this address
     println!("Looking up first-seen txid for address...");
-    let txid = match find_first_seen_txid(MEMPOOL_API, &address.to_string()).await {
+    let txid = match find_first_seen_txid(mempool_api, &address.to_string()).await {
         Ok(Some(txid)) => txid,
         Ok(None) => panic!("No transactions found for address! Exiting..."),
         Err(e) => panic!("Failed to fetch transactions: {}", e),
@@ -151,10 +140,10 @@ async fn main() {
     println!("First seen txid: {}", txid);
 
     println!("Fetching raw tx...");
-    let tx = fetch_raw_tx(MEMPOOL_API, &txid).await.unwrap();
+    let tx = fetch_raw_tx(mempool_api, &txid).await.unwrap();
 
     println!("Fetching transaction inclusion proof...");
-    let spv_proof = fetch_spv_proof(MEMPOOL_API, &txid).await.unwrap();
+    let spv_proof = fetch_spv_proof(mempool_api, &txid).await.unwrap();
 
     println!("Generating block inclusion proof...");
     let spv_proof_bytes = hex::decode(&spv_proof).unwrap();
@@ -188,13 +177,28 @@ async fn main() {
         .unwrap()
         .receipt;
 
+    // Verify correct data commitments in the receipt journal.
+    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
+        receipt.journal.decode().unwrap();
+    println!();
+    println!("Proof generated successfully!");
+    println!(
+        "Block inclusion root: {:?}",
+        hex::encode(block_inclusion_root)
+    );
+    println!("Block month: {:?}", block_month);
+    println!("Identity: {:?}", identity);
+
     // Serialize the receipt and print as bech32m
     let serialized_receipt = serialize_receipt(&receipt);
     println!();
-    println!("Receipt");
+    println!("Proof:");
     println!("{}", serialized_receipt);
+}
 
-    // Verify correct data commitments in the receipt journal.
+fn verify_command(receipt_str: &str) {
+    let receipt = deserialize_receipt(receipt_str);
+    receipt.verify(OGZKP_ID).unwrap();
     let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
         receipt.journal.decode().unwrap();
     println!();
@@ -205,10 +209,49 @@ async fn main() {
     println!("Block month: {:?}", block_month);
     println!("Identity: {:?}", identity);
     println!();
+}
 
-    // The receipt was verified at the end of proving, but the below code is an
-    // example of how someone else could verify this receipt.
-    deserialize_receipt(&serialized_receipt)
-        .verify(OGZKP_ID)
-        .unwrap();
+#[derive(Parser)]
+#[command(name = "ogzkp", version, about = "og-zkp CLI")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Generate a proof and return the serialized receipt
+    Prove {
+        /// Message that was signed (must start with "og-zkp ")
+        #[arg(long, required = true)]
+        message: String,
+        /// Base64-encoded signature of the message
+        #[arg(long, required = true)]
+        signature: String,
+        /// Optional mempool API endpoint
+        #[arg(long, default_value = "https://mempool.space/api")]
+        mempool_api: String,
+    },
+    /// Verify a serialized receipt and print committed data
+    Verify {
+        /// Bech32m-encoded serialized receipt
+        receipt: String,
+    },
+}
+
+#[tokio::main]
+async fn main() {
+    let cli = Cli::parse();
+    match cli.command {
+        Commands::Prove {
+            message,
+            signature,
+            mempool_api,
+        } => {
+            prove_command(&message, &signature, &mempool_api).await;
+        }
+        Commands::Verify { receipt } => {
+            verify_command(&receipt);
+        }
+    }
 }
