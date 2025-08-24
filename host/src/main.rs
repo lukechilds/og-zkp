@@ -11,7 +11,9 @@ use base64::prelude::*;
 use bincode;
 use bitcoin::bech32;
 use bitcoin::bech32::{Bech32m, Hrp};
+use flate2::{bufread::GzDecoder, write::GzEncoder, Compression};
 use serde::Deserialize;
+use std::io::{Read, Write};
 
 #[derive(Deserialize)]
 struct TxShort {
@@ -93,14 +95,19 @@ async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String, reqwest::Err
 
 fn serialize_receipt(receipt: &Receipt) -> String {
     let receipt_bytes = bincode::serialize(receipt).unwrap();
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    encoder.write_all(&receipt_bytes).unwrap();
+    let compressed = encoder.finish().unwrap();
     let hrp = Hrp::parse("og-zkp").unwrap();
-    bech32::encode::<Bech32m>(hrp, &receipt_bytes).unwrap()
+    bech32::encode::<Bech32m>(hrp, &compressed).unwrap()
 }
 
 fn deserialize_receipt(receipt: &str) -> Receipt {
-    let (_hrp, receipt_bytes) = bech32::decode(receipt).unwrap();
-    let receipt: Receipt = bincode::deserialize(&receipt_bytes).unwrap();
-    receipt
+    let (_hrp, compressed) = bech32::decode(receipt).unwrap();
+    let mut decoder = GzDecoder::new(&compressed[..]);
+    let mut decompressed = Vec::new();
+    decoder.read_to_end(&mut decompressed).unwrap();
+    bincode::deserialize(&decompressed).unwrap()
 }
 
 #[tokio::main]
