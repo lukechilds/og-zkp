@@ -145,14 +145,8 @@ async fn main() {
     println!("Looking up first-seen txid for address...");
     let txid = match find_first_seen_txid(MEMPOOL_API, &address.to_string()).await {
         Ok(Some(txid)) => txid,
-        Ok(None) => {
-            println!("No transactions found for address! Exiting...");
-            return;
-        }
-        Err(e) => {
-            eprintln!("Failed to fetch transactions: {}", e);
-            return;
-        }
+        Ok(None) => panic!("No transactions found for address! Exiting..."),
+        Err(e) => panic!("Failed to fetch transactions: {}", e),
     };
     println!("First seen txid: {}", txid);
 
