@@ -1,3 +1,5 @@
+// TODO: Move these into main modules or inline them
+
 pub const OGZKP_MESSAGE_PREFIX: &str = "og-zkp ";
 
 use bitcoin::secp256k1::Secp256k1;
