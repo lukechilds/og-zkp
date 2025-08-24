@@ -1,13 +1,21 @@
+use bitcoin::hashes::Hash as _;
 use bitcoin::{consensus, script::ScriptBuf, MerkleBlock, Transaction, Txid};
 use ogzkp_core::{
-    recover_pubkey_from_bitcoin_signed_message, start_of_month, OGZKP_MESSAGE_PREFIX,
+    recover_pubkey_from_bitcoin_signed_message, start_of_month, verify_header_merkle_proof,
+    OGZKP_MESSAGE_PREFIX,
 };
 use risc0_zkvm::guest::env;
 
 fn main() {
     // Read the input
-    let (message, signature_bytes, tx_hex, spv_proof_hex): (String, Vec<u8>, String, String) =
-        env::read();
+    let (message, signature_bytes, tx_hex, spv_proof_hex, header_proof, block_inclusion_root): (
+        String,
+        Vec<u8>,
+        String,
+        String,
+        Vec<u8>,
+        [u8; 32],
+    ) = env::read();
 
     // Assert message starts with "og-zkp"
     assert!(
@@ -45,13 +53,21 @@ fn main() {
         .expect("Failed to extract matches from SPV proof");
     assert!(matches.contains(&txid), "Transaction is not in SPV proof");
 
-    // TODO: assert block inclusion proof is valid for header merkle root
+    // Verify header inclusion against embedded merkle root over known headers
+    let block_hash = spv_proof.header.block_hash().to_byte_array();
+    assert!(
+        verify_header_merkle_proof(block_hash, &header_proof, block_inclusion_root),
+        "Header not included in known header set"
+    );
 
     // Calculate the time of the start of the calender month the tx was confirmed in
     let block_time = spv_proof.header.time;
     let block_month = start_of_month(block_time).to_string();
 
+    // Grab identity from the message
+    let identity = message.strip_prefix(OGZKP_MESSAGE_PREFIX).unwrap();
+
     // Commit to the month and the message
-    let output = block_month + " " + message.strip_prefix(OGZKP_MESSAGE_PREFIX).unwrap();
+    let output = (block_inclusion_root, block_month, identity);
     env::commit(&output);
 }

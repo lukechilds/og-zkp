@@ -3,7 +3,9 @@
 use methods::{OGZKP_ELF, OGZKP_ID};
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, Receipt, ReceiptKind};
 
-use ogzkp_core::recover_pubkey_from_bitcoin_signed_message;
+use ogzkp_core::{
+    generate_header_merkle_proof, headers_merkle_root, recover_pubkey_from_bitcoin_signed_message,
+};
 
 use bitcoin::{Address, Network};
 
@@ -14,6 +16,10 @@ use bitcoin::bech32::{Bech32m, Hrp};
 use flate2::{bufread::GzDecoder, write::GzEncoder, Compression};
 use serde::Deserialize;
 use std::io::{Read, Write};
+
+use bitcoin::consensus;
+use bitcoin::hashes::Hash as _;
+use bitcoin::MerkleBlock;
 
 #[derive(Deserialize)]
 struct TxShort {
@@ -152,14 +158,27 @@ async fn main() {
 
     println!("Fetching raw tx...");
     let tx = fetch_raw_tx(MEMPOOL_API, &txid).await.unwrap();
-    println!("Raw tx: {}", tx);
 
-    println!("Fetching SPV proof for txid...");
+    println!("Fetching transaction inclusion proof...");
     let spv_proof = fetch_spv_proof(MEMPOOL_API, &txid).await.unwrap();
-    println!("SPV proof: {}", spv_proof);
 
-    // Create an executor environment and pass in the input.
-    let input = (message, signature_bytes, tx, spv_proof);
+    println!("Generating block inclusion proof...");
+    let spv_proof_bytes = hex::decode(&spv_proof).unwrap();
+    let merkle_block: MerkleBlock = consensus::encode::deserialize(&spv_proof_bytes).unwrap();
+    let block_hash = merkle_block.header.block_hash().to_byte_array();
+    let header_proof =
+        generate_header_merkle_proof(block_hash).expect("Header not found in known header set");
+    let block_inclusion_root = headers_merkle_root();
+
+    // Bundle input
+    let input = (
+        message,
+        signature_bytes,
+        tx,
+        spv_proof,
+        header_proof,
+        block_inclusion_root,
+    );
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
@@ -167,6 +186,7 @@ async fn main() {
         .unwrap();
 
     // Prove the program and obtain the receipt.
+    println!("Proving...");
     let prover = default_prover();
     let opts = ProverOpts::default().with_receipt_kind(ReceiptKind::Groth16);
     let receipt = prover
@@ -181,9 +201,16 @@ async fn main() {
     println!("{}", serialized_receipt);
 
     // Verify correct data commitments in the receipt journal.
-    let receipt_output: String = receipt.journal.decode().unwrap();
+    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
+        receipt.journal.decode().unwrap();
     println!();
-    println!("Commitment: {:?}", receipt_output);
+    println!(
+        "Block inclusion root: {:?}",
+        hex::encode(block_inclusion_root)
+    );
+    println!("Block month: {:?}", block_month);
+    println!("Identity: {:?}", identity);
+    println!();
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
