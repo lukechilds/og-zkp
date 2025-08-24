@@ -104,7 +104,7 @@ fn serialize_receipt(receipt: &Receipt) -> String {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(&receipt_bytes).unwrap();
     let compressed = encoder.finish().unwrap();
-    let hrp = Hrp::parse("og-zkp").unwrap();
+    let hrp = Hrp::parse("ogzkp").unwrap();
     bech32::encode::<Bech32m>(hrp, &compressed).unwrap()
 }
 
