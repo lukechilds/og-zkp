@@ -29,6 +29,7 @@ pub fn start_of_month(unix_ts: u32) -> u32 {
 
 // Block inclusion proof methods
 
+// TODO: https://crates.io/crates/merkletree looks better actually, try that
 use rs_merkle::{algorithms::Sha256, MerkleProof, MerkleTree};
 
 pub fn headers_merkle_root() -> [u8; 32] {
