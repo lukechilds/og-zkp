@@ -247,11 +247,7 @@ async fn main() {
             message,
             signature,
             mempool_api,
-        } => {
-            prove_command(&message, &signature, &mempool_api).await;
-        }
-        Commands::Verify { receipt } => {
-            verify_command(&receipt);
-        }
+        } => prove_command(&message, &signature, &mempool_api).await,
+        Commands::Verify { receipt } => verify_command(&receipt),
     }
 }
