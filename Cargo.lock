@@ -1328,26 +1328,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3011d1213f159867b13cfd6ac92d2cd5f1345762c63be3554e84092d85a50bbd"
 
 [[package]]
-name = "host"
-version = "0.1.0"
-dependencies = [
- "base64",
- "bincode",
- "bitcoin",
- "clap",
- "flate2",
- "hex",
- "methods",
- "ogzkp-core",
- "reqwest",
- "risc0-zkvm",
- "serde",
- "serde_json",
- "tokio",
- "tracing-subscriber 0.3.19",
-]
-
-[[package]]
 name = "http"
 version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1994,6 +1974,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62948e14d923ea95ea2c7c86c71013138b66525b86bdc08d2dcc262bdb497b87"
 dependencies = [
  "memchr",
+]
+
+[[package]]
+name = "og-zkp"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "bincode",
+ "bitcoin",
+ "clap",
+ "flate2",
+ "hex",
+ "methods",
+ "ogzkp-core",
+ "reqwest",
+ "risc0-zkvm",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing-subscriber 0.3.19",
 ]
 
 [[package]]
