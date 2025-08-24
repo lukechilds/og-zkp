@@ -34,6 +34,7 @@ fn main() {
         consensus::encode::deserialize(&tx_bytes).expect("Failed to parse transaction");
 
     // Assert pubkey is a P2PKH output in the transaction
+    // TODO: Support other address types
     let expected_output: ScriptBuf = ScriptBuf::new_p2pkh(&pubkey.pubkey_hash());
     let tx_has_expected_output = tx.output.iter().any(|o| o.script_pubkey == expected_output);
     assert!(
