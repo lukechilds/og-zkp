@@ -1,5 +1,5 @@
 use methods::OGZKP_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts, ReceiptKind};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 use bitcoin::consensus;
 use bitcoin::hashes::Hash;
@@ -70,7 +70,7 @@ pub async fn run(message: &str, signature: &str, mempool_api: &str) {
     // Prove the program and obtain the receipt.
     println!("Proving...");
     let prover = default_prover();
-    let opts = ProverOpts::default().with_receipt_kind(ReceiptKind::Groth16);
+    let opts = risc0_zkvm::ProverOpts::groth16();
     let receipt = prover
         .prove_with_opts(env, OGZKP_ELF, &opts)
         .unwrap()
