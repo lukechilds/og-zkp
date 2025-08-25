@@ -9,7 +9,7 @@ The og-zkp prover outputs a Groth16 SNARK comitting to a `month` (timestamp repr
 ## Example
 
 ```
-$ bitcoin-cli signmessage "1LukeQU5jwebXbMLDVydeH4vFSobRV9rkj" "og-zkp x.com/lukechilds"
+$ bitcoin-cli signmessage 1LukeQU5jwebXbMLDVydeH4vFSobRV9rkj "og-zkp x.com/lukechilds"
 HE6QfyPFmJvCGjWohZYAVa+pbdSRjeQpdNbXp6zNbDCnEN65xmK+WYidKlt6J1E/GDJpmLcatjEazVo5wqOg6wM=
 
 $ og-zkp prove --message "og-zkp x.com/lukechilds" --signature "HE6QfyPFmJvCGjWohZYAVa+pbdSRjeQpdNbXp6zNbDCnEN65xmK+WYidKlt6J1E/GDJpmLcatjEazVo5wqOg6wM="
