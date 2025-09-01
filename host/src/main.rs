@@ -24,6 +24,9 @@ enum Commands {
         /// Base64-encoded signature of the message
         #[arg(long, required = true)]
         signature: String,
+        /// Bitcoin address the message was signed by
+        #[arg(long, required = true)]
+        address: String,
         /// Optional raw transaction hex (skips fetching)
         #[arg(long)]
         transaction: Option<String>,
@@ -48,10 +51,21 @@ async fn main() {
         Commands::Prove {
             message,
             signature,
+            address,
             transaction,
             spv_proof,
             mempool_api,
-        } => commands::prove::run(&message, &signature, &mempool_api, transaction, spv_proof).await,
+        } => {
+            commands::prove::run(
+                &message,
+                &signature,
+                &address,
+                &mempool_api,
+                transaction,
+                spv_proof,
+            )
+            .await
+        }
         Commands::Verify { receipt } => commands::verify::run(&receipt),
     }
 }

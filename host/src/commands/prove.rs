@@ -4,13 +4,12 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use bitcoin::consensus;
 use bitcoin::hashes::Hash;
 use bitcoin::MerkleBlock;
-use bitcoin::{Address, Network, Transaction};
+use bitcoin::{Address, AddressType, Network, Transaction};
+use std::str::FromStr;
 
 use base64::prelude::*;
 
-use ogzkp_core::{
-    generate_header_merkle_proof, headers_merkle_root, recover_pubkey_from_bitcoin_signed_message,
-};
+use ogzkp_core::{generate_header_merkle_proof, headers_merkle_root};
 
 use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
@@ -18,6 +17,7 @@ use crate::receipt::serialize_receipt;
 pub async fn run(
     message: &str,
     signature: &str,
+    address: &str,
     mempool_api: &str,
     mut transaction: Option<String>,
     mut spv_proof: Option<String>,
@@ -27,13 +27,18 @@ pub async fn run(
     // Decode the base64 signature
     let signature_bytes = BASE64_STANDARD.decode(signature).unwrap();
 
-    // Recover pubkey from the signed message
-    let pubkey = recover_pubkey_from_bitcoin_signed_message(&signature_bytes, &message)
-        .expect("Failed to recover pubkey from bitcoin signed message");
-
-    // Derive P2PKH address from pubkey
-    let address = Address::p2pkh(&pubkey, Network::Bitcoin);
-    println!("Extracted P2PKH address: {}", address);
+    // Get address type
+    let passed_in_address = Address::from_str(address)
+        .unwrap()
+        .require_network(Network::Bitcoin)
+        .unwrap();
+    let address_type = match passed_in_address.address_type() {
+        Some(AddressType::P2pkh) => 0,
+        Some(AddressType::P2sh) => 1, // Assume nested P2WPKH
+        Some(AddressType::P2wpkh) => 2,
+        Some(AddressType::P2tr) => 3,
+        _ => panic!("Unsupported address type"),
+    };
 
     if transaction.is_none() {
         // Lookup first-seen txid for this address
@@ -75,6 +80,7 @@ pub async fn run(
     let input = (
         message,
         signature_bytes,
+        address_type,
         transaction.unwrap(),
         spv_proof.unwrap(),
         header_proof,
