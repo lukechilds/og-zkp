@@ -873,6 +873,7 @@ dependencies = [
  "hex",
  "ogzkp-core",
  "risc0-zkvm",
+ "time",
 ]
 
 [[package]]

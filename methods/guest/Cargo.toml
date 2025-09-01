@@ -10,3 +10,4 @@ bitcoin = { version = "0.32.7", default-features = false, features = ["secp-reco
 risc0-zkvm = { version = "^3.0.1", default-features = false, features = ['std'] }
 ogzkp-core = { path = "../../core" }
 hex = "0.4"
+time = "0.3.41"
