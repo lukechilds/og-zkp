@@ -24,6 +24,12 @@ enum Commands {
         /// Base64-encoded signature of the message
         #[arg(long, required = true)]
         signature: String,
+        /// Optional raw transaction hex (skips fetching)
+        #[arg(long)]
+        transaction: Option<String>,
+        /// Optional raw SPV proof (MerkleBlock) hex (skips fetching)
+        #[arg(long)]
+        spv_proof: Option<String>,
         /// Optional mempool API endpoint
         #[arg(long, default_value = "https://mempool.space/api")]
         mempool_api: String,
@@ -42,8 +48,10 @@ async fn main() {
         Commands::Prove {
             message,
             signature,
+            transaction,
+            spv_proof,
             mempool_api,
-        } => commands::prove::run(&message, &signature, &mempool_api).await,
+        } => commands::prove::run(&message, &signature, &mempool_api, transaction, spv_proof).await,
         Commands::Verify { receipt } => commands::verify::run(&receipt),
     }
 }

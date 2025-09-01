@@ -4,7 +4,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use bitcoin::consensus;
 use bitcoin::hashes::Hash;
 use bitcoin::MerkleBlock;
-use bitcoin::{Address, Network};
+use bitcoin::{Address, Network, Transaction};
 
 use base64::prelude::*;
 
@@ -15,7 +15,13 @@ use ogzkp_core::{
 use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
 
-pub async fn run(message: &str, signature: &str, mempool_api: &str) {
+pub async fn run(
+    message: &str,
+    signature: &str,
+    mempool_api: &str,
+    mut transaction: Option<String>,
+    mut spv_proof: Option<String>,
+) {
     println!("og-zkp");
 
     // Decode the base64 signature
@@ -29,23 +35,36 @@ pub async fn run(message: &str, signature: &str, mempool_api: &str) {
     let address = Address::p2pkh(&pubkey, Network::Bitcoin);
     println!("Extracted P2PKH address: {}", address);
 
-    // Lookup first-seen txid for this address
-    println!("Looking up first-seen txid for address...");
-    let txid = match find_first_seen_txid(mempool_api, &address.to_string()).await {
-        Ok(Some(txid)) => txid,
-        Ok(None) => panic!("No transactions found for address! Exiting..."),
-        Err(e) => panic!("Failed to fetch transactions: {}", e),
-    };
-    println!("First seen txid: {}", txid);
+    if transaction.is_none() {
+        // Lookup first-seen txid for this address
+        println!("Looking up first-seen txid for address...");
+        let txid = match find_first_seen_txid(mempool_api, &address.to_string()).await {
+            Ok(Some(txid)) => txid,
+            Ok(None) => panic!("No transactions found for address! Exiting..."),
+            Err(e) => panic!("Failed to fetch transactions: {}", e),
+        };
+        println!("First seen txid: {}", txid);
 
-    println!("Fetching raw tx...");
-    let tx = fetch_raw_tx(mempool_api, &txid).await.unwrap();
+        println!("Fetching raw tx...");
+        transaction = Some(fetch_raw_tx(mempool_api, &txid).await.unwrap());
+    }
 
-    println!("Fetching transaction inclusion proof...");
-    let spv_proof = fetch_spv_proof(mempool_api, &txid).await.unwrap();
+    if spv_proof.is_none() {
+        println!("Fetching transaction inclusion proof...");
+        let tx_bytes =
+            hex::decode(&transaction.as_deref().unwrap()).expect("Invalid transaction hex");
+        let txid = consensus::encode::deserialize::<Transaction>(&tx_bytes)
+            .unwrap()
+            .compute_txid();
+        spv_proof = Some(
+            fetch_spv_proof(mempool_api, &txid.to_string())
+                .await
+                .unwrap(),
+        );
+    }
 
     println!("Generating block inclusion proof...");
-    let spv_proof_bytes = hex::decode(&spv_proof).unwrap();
+    let spv_proof_bytes = hex::decode(&spv_proof.as_deref().unwrap()).unwrap();
     let merkle_block: MerkleBlock = consensus::encode::deserialize(&spv_proof_bytes).unwrap();
     let block_hash = merkle_block.header.block_hash().to_byte_array();
     let header_proof =
@@ -56,8 +75,8 @@ pub async fn run(message: &str, signature: &str, mempool_api: &str) {
     let input = (
         message,
         signature_bytes,
-        tx,
-        spv_proof,
+        transaction.unwrap(),
+        spv_proof.unwrap(),
         header_proof,
         block_inclusion_root,
     );
