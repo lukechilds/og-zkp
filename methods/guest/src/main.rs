@@ -14,7 +14,6 @@ fn pubkey_to_output_script(pubkey: PublicKey, address_type: i32) -> ScriptBuf {
     match address_type {
         // P2PKH
         0 => ScriptBuf::new_p2pkh(&pubkey.pubkey_hash()),
-        // TODO: Test these script types
         // P2SH-P2WPKH
         1 => {
             let wpkh = pubkey.wpubkey_hash().unwrap();
