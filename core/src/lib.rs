@@ -1,8 +1,5 @@
 // TODO: Move these into main modules or inline them
 
-// Block inclusion proof methods
-
-// TODO: https://crates.io/crates/merkletree looks better actually, try that
 use rs_merkle::{algorithms::Sha256, MerkleProof, MerkleTree};
 
 pub fn headers_merkle_root() -> [u8; 32] {
