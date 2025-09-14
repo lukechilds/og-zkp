@@ -22,8 +22,8 @@ jobs:
         run: |
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-          ~/.risc0/bin/rzup install rust
-          ~/.risc0/bin/rzup install cpp
+          ~/.risc0/bin/rzup install rust 1.88.0
+          ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run e2e tests
         run: cargo test --test e2e
@@ -47,7 +47,8 @@ jobs:
         run: |
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-          ~/.risc0/bin/rzup install rust
+          ~/.risc0/bin/rzup install rust 1.88.0
+          ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run e2e tests
         run: OGZKP_TEST_OFFLINE_MODE="1" cargo test --test e2e
