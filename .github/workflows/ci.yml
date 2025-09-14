@@ -23,6 +23,7 @@ jobs:
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
           ~/.risc0/bin/rzup install rust
+          ~/.risc0/bin/rzup install cpp
 
       - name: Run e2e tests
         run: cargo test --test e2e
