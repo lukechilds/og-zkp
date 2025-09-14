@@ -18,6 +18,12 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+      - name: Install RISC Zero toolchain (rzup)
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+          ~/.risc0/bin/rzup install rust
+
       - name: Run e2e tests
         run: cargo test --test e2e
 
@@ -35,6 +41,12 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install RISC Zero toolchain (rzup)
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+          ~/.risc0/bin/rzup install rust
 
       - name: Run e2e tests
         run: OGZKP_TEST_OFFLINE_MODE="1" cargo test --test e2e
