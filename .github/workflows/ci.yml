@@ -28,7 +28,7 @@ jobs:
       - name: Run e2e tests
         run: cargo test --test e2e
 
-  e2e-offline:
+  e2e-fetch:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -51,4 +51,4 @@ jobs:
           ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run e2e tests
-        run: OGZKP_TEST_OFFLINE_MODE="1" cargo test --test e2e
+        run: OGZKP_TEST_MEMPOOL_LOOKUP="1" cargo test --test e2e
