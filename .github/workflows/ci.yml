@@ -9,9 +9,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-
       - name: Run e2e tests
         run: cargo test --test e2e
 
@@ -20,9 +17,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
 
       - name: Run e2e tests
         run: OGZKP_TEST_OFFLINE_MODE="1" cargo test --test e2e
