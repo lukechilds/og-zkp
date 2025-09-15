@@ -880,12 +880,8 @@ dependencies = [
 name = "ogzkp-core"
 version = "0.1.0"
 dependencies = [
- "bitcoin",
  "hex",
- "hex-literal",
  "rs_merkle",
- "serde",
- "time",
 ]
 
 [[package]]

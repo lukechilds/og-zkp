@@ -4,10 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bitcoin = { version = "0.32.7", default-features = false, features = ["secp-recovery"] }
-time = "0.3.41"
-serde = { version = "1", features = ["derive"] }
 rs_merkle = "1.5"
-hex-literal = "0.4"
 hex = "0.4.3"
 
