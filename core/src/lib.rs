@@ -1,5 +1,3 @@
-// TODO: Move these into main modules or inline them
-
 use rs_merkle::{algorithms::Sha256, MerkleProof, MerkleTree};
 
 pub fn headers_merkle_root() -> [u8; 32] {
