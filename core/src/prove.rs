@@ -40,7 +40,7 @@ pub async fn run(
         ($($arg:tt)*) => {
             match &anim {
                 Some(a) => a.set_status(&format!($($arg)*)),
-                None => if !json { eprintln!($($arg)*); }
+                None => eprintln!($($arg)*),
             }
         }
     }
