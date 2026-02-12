@@ -9,11 +9,11 @@ use std::process::Command;
 #[test]
 fn guest_image_id_unchanged() {
     let expected: [u32; 8] = [
-        1980395554, 3671540427, 4116214181, 1322259775, 2370310204, 2701605520, 1164838759,
-        3261824421,
+        399370818, 3491821989, 976888950, 4248834973, 729065371, 3024157953, 2172114215, 4060861482,
     ];
     assert_eq!(
-        methods::OGZKP_ID, expected,
+        methods::OGZKP_ID,
+        expected,
         "Guest image ID has changed! This will break verification of existing proofs. \
          If this change is intentional, update the expected value in this test."
     );
