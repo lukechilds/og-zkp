@@ -5,10 +5,12 @@ use bitcoin::consensus;
 use bitcoin::hashes::Hash;
 use bitcoin::MerkleBlock;
 use bitcoin::{Address, AddressType, Network, Transaction};
+use std::io::IsTerminal;
 use std::str::FromStr;
 
 use base64::prelude::*;
 
+use crate::animation::Animation;
 use crate::block_inclusion_proof::{
     generate_header_merkle_proof, headers_merkle_root, verify_header_merkle_proof,
 };
@@ -25,9 +27,22 @@ pub async fn run(
     transaction: Option<String>,
     spv_proof: Option<String>,
     json: bool,
+    no_animation: bool,
 ) -> Result<()> {
+    let seed = format!("{message}{signature}{address}");
+    let anim = if !json && !no_animation && std::io::stderr().is_terminal() {
+        Some(Animation::start(&seed))
+    } else {
+        None
+    };
+
     macro_rules! status {
-        ($($arg:tt)*) => { if !json { println!($($arg)*); } }
+        ($($arg:tt)*) => {
+            match &anim {
+                Some(a) => a.set_status(&format!($($arg)*)),
+                None => if !json { eprintln!($($arg)*); }
+            }
+        }
     }
 
     status!("og-zkp");
@@ -131,6 +146,9 @@ pub async fn run(
     // Serialize the receipt
     let serialized_receipt = serialize_receipt(&receipt)?;
 
+    status!("Proof generated successfully");
+    drop(anim);
+
     if json {
         let output = serde_json::json!({
             "block_inclusion_root": hex::encode(block_inclusion_root),
@@ -141,7 +159,6 @@ pub async fn run(
         println!("{}", serde_json::to_string_pretty(&output).unwrap());
     } else {
         println!();
-        println!("Proof generated successfully!");
         println!(
             "Block inclusion root: {:?}",
             hex::encode(block_inclusion_root)

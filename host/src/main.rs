@@ -32,6 +32,9 @@ enum Commands {
         /// Output result as JSON
         #[arg(long)]
         json: bool,
+        /// Disable terminal animation
+        #[arg(long)]
+        no_animation: bool,
     },
     /// Verify a serialized receipt and print committed data
     Verify {
@@ -55,6 +58,7 @@ async fn main() -> anyhow::Result<()> {
             spv_proof,
             mempool_api,
             json,
+            no_animation,
         } => {
             ogzkp_core::prove::run(
                 methods::OGZKP_ELF,
@@ -65,6 +69,7 @@ async fn main() -> anyhow::Result<()> {
                 transaction,
                 spv_proof,
                 json,
+                no_animation,
             )
             .await
         }

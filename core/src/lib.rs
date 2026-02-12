@@ -3,6 +3,8 @@ pub mod block_inclusion_proof;
 pub mod guest;
 
 #[cfg(feature = "host")]
+pub mod animation;
+#[cfg(feature = "host")]
 pub mod mempool_api;
 #[cfg(feature = "host")]
 pub mod prove;
