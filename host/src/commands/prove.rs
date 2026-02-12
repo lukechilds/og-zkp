@@ -21,8 +21,8 @@ pub async fn run(
     signature: &str,
     address: &str,
     mempool_api: &str,
-    mut transaction: Option<String>,
-    mut spv_proof: Option<String>,
+    transaction: Option<String>,
+    spv_proof: Option<String>,
 ) -> Result<()> {
     println!("og-zkp");
 
@@ -44,46 +44,48 @@ pub async fn run(
         _ => bail!("Unsupported address type"),
     };
 
-    if transaction.is_none() {
-        // Lookup first-seen txid for this address
-        println!("Looking up first-seen txid for address...");
-        let txid = match find_first_seen_txid(mempool_api, address).await {
-            Ok(Some(txid)) => txid,
-            Ok(None) => bail!("No transactions found for address"),
-            Err(e) => bail!("Failed to fetch transactions: {}", e),
-        };
-        println!("First seen txid: {}", txid);
+    // Fetch transaction if not provided
+    let transaction = match transaction {
+        Some(tx) => tx,
+        None => {
+            // Lookup first-seen txid for this address
+            println!("Looking up first-seen txid for address...");
+            let txid = match find_first_seen_txid(mempool_api, address).await {
+                Ok(Some(txid)) => txid,
+                Ok(None) => bail!("No transactions found for address"),
+                Err(e) => bail!("Failed to fetch transactions: {}", e),
+            };
+            println!("First seen txid: {}", txid);
 
-        println!("Fetching raw tx...");
-        transaction = Some(
+            println!("Fetching raw tx...");
             fetch_raw_tx(mempool_api, &txid)
                 .await
-                .context("Failed to fetch raw transaction")?,
-        );
-    }
+                .context("Failed to fetch raw transaction")?
+        }
+    };
 
-    if spv_proof.is_none() {
-        println!("Fetching transaction inclusion proof...");
-        let tx_bytes =
-            hex::decode(transaction.as_deref().unwrap()).context("Invalid transaction hex")?;
-        let txid = consensus::encode::deserialize::<Transaction>(&tx_bytes)
-            .context("Failed to parse transaction")?
-            .compute_txid();
-        spv_proof = Some(
+    // Fetch SPV proof if not provided
+    let spv_proof = match spv_proof {
+        Some(proof) => proof,
+        None => {
+            println!("Fetching transaction inclusion proof...");
+            let tx_bytes = hex::decode(&transaction).context("Invalid transaction hex")?;
+            let txid = consensus::encode::deserialize::<Transaction>(&tx_bytes)
+                .context("Failed to parse transaction")?
+                .compute_txid();
             fetch_spv_proof(mempool_api, &txid.to_string())
                 .await
-                .context("Failed to fetch SPV proof")?,
-        );
-    }
+                .context("Failed to fetch SPV proof")?
+        }
+    };
 
     println!("Generating block inclusion proof...");
-    let spv_proof_bytes =
-        hex::decode(spv_proof.as_deref().unwrap()).context("Invalid SPV proof hex")?;
+    let spv_proof_bytes = hex::decode(&spv_proof).context("Invalid SPV proof hex")?;
     let merkle_block: MerkleBlock =
         consensus::encode::deserialize(&spv_proof_bytes).context("Failed to parse SPV proof")?;
     let block_hash = merkle_block.header.block_hash().to_byte_array();
-    let header_proof = generate_header_merkle_proof(block_hash)
-        .context("Header not found in known header set")?;
+    let header_proof =
+        generate_header_merkle_proof(block_hash).context("Header not found in known header set")?;
     let block_inclusion_root = headers_merkle_root();
     anyhow::ensure!(
         verify_header_merkle_proof(block_hash, &header_proof, block_inclusion_root),
@@ -95,8 +97,8 @@ pub async fn run(
         message,
         signature_bytes,
         address_type,
-        transaction.unwrap(),
-        spv_proof.unwrap(),
+        transaction,
+        spv_proof,
         header_proof,
         block_inclusion_root,
     );
@@ -116,8 +118,10 @@ pub async fn run(
         .receipt;
 
     // Verify correct data commitments in the receipt journal.
-    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
-        receipt.journal.decode().context("Failed to decode receipt journal")?;
+    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) = receipt
+        .journal
+        .decode()
+        .context("Failed to decode receipt journal")?;
     println!();
     println!("Proof generated successfully!");
     println!(
