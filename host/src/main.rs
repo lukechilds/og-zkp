@@ -1,11 +1,3 @@
-// Modules
-mod block_inclusion_proof;
-mod mempool_api;
-mod receipt;
-
-// CLI commands
-mod commands;
-
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -57,7 +49,8 @@ async fn main() -> anyhow::Result<()> {
             spv_proof,
             mempool_api,
         } => {
-            commands::prove::run(
+            ogzkp_core::prove::run(
+                methods::OGZKP_ELF,
                 &message,
                 &signature,
                 &address,
@@ -67,6 +60,26 @@ async fn main() -> anyhow::Result<()> {
             )
             .await
         }
-        Commands::Verify { receipt } => commands::verify::run(&receipt),
+        Commands::Verify { receipt } => ogzkp_core::verify::run(methods::OGZKP_ID, &receipt),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Verify the guest program image ID hasn't changed unexpectedly.
+    // If this test fails it means the guest binary has changed which will invalidate all existing proofs.
+    // Update the expected value only after intentional guest changes.
+    #[test]
+    fn guest_image_id_unchanged() {
+        let expected: [u32; 8] = [
+            1170716740, 710300014, 2132534598, 2401012405, 554014269, 2155272761, 863331411,
+            509203374,
+        ];
+        assert_eq!(
+            methods::OGZKP_ID,
+            expected,
+            "Guest image ID has changed! This will break verification of existing proofs. \
+             If this change is intentional, update the expected value in this test."
+        );
     }
 }

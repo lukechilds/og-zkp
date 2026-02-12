@@ -869,9 +869,16 @@ dependencies = [
 name = "ogzkp"
 version = "0.1.0"
 dependencies = [
+ "ogzkp-core",
+ "risc0-zkvm",
+]
+
+[[package]]
+name = "ogzkp-core"
+version = "0.1.0"
+dependencies = [
  "bitcoin",
  "hex",
- "risc0-zkvm",
  "rs_merkle",
  "time",
 ]

@@ -1,5 +1,22 @@
-use rs_merkle::{algorithms::Sha256, MerkleProof, MerkleTree};
+use rs_merkle::{algorithms::Sha256, MerkleProof};
 
+// Verify the single-blob proof against an expected root.
+pub fn verify_header_merkle_proof(
+    leaf_hash_be: [u8; 32],
+    blob: &[u8],
+    expected_root: [u8; 32],
+) -> bool {
+    let index = u32::from_le_bytes(blob[0..4].try_into().unwrap()) as usize;
+    let total_leaves_count = u32::from_le_bytes(blob[4..8].try_into().unwrap()) as usize;
+    let proof_bytes = &blob[8..];
+    let proof = MerkleProof::<Sha256>::from_bytes(proof_bytes).unwrap();
+    proof.verify(expected_root, &[index], &[leaf_hash_be], total_leaves_count)
+}
+
+#[cfg(feature = "host")]
+use rs_merkle::MerkleTree;
+
+#[cfg(feature = "host")]
 pub fn headers_merkle_root() -> [u8; 32] {
     MerkleTree::<Sha256>::from_leaves(&get_block_hashes())
         .root()
@@ -8,6 +25,7 @@ pub fn headers_merkle_root() -> [u8; 32] {
 
 // Produce a single serialized proof blob:
 // 4 byte index + 4 byte total_leaves + proof bytes
+#[cfg(feature = "host")]
 pub fn generate_header_merkle_proof(target_hash_be: [u8; 32]) -> Option<Vec<u8>> {
     let leaves = get_block_hashes();
     let index = leaves.iter().position(|h| *h == target_hash_be)?; // index in the known set
@@ -23,21 +41,11 @@ pub fn generate_header_merkle_proof(target_hash_be: [u8; 32]) -> Option<Vec<u8>>
     Some(blob)
 }
 
-// Verify the single-blob proof against an expected root.
-pub fn verify_header_merkle_proof(
-    leaf_hash_be: [u8; 32],
-    blob: &[u8],
-    expected_root: [u8; 32],
-) -> bool {
-    let index = u32::from_le_bytes(blob[0..4].try_into().unwrap()) as usize;
-    let total_leaves_count = u32::from_le_bytes(blob[4..8].try_into().unwrap()) as usize;
-    let proof_bytes = &blob[8..];
-    let proof = MerkleProof::<Sha256>::from_bytes(proof_bytes).unwrap();
-    proof.verify(expected_root, &[index], &[leaf_hash_be], total_leaves_count)
-}
-
 // Statically load blocks from text file at compile time
+#[cfg(feature = "host")]
 use hex::FromHex;
+
+#[cfg(feature = "host")]
 fn get_block_hashes() -> Vec<[u8; 32]> {
     include_str!("blockhashes.txt")
         .lines()
@@ -54,6 +62,7 @@ fn get_block_hashes() -> Vec<[u8; 32]> {
 }
 
 #[cfg(test)]
+#[cfg(feature = "host")]
 mod tests {
     use super::*;
 

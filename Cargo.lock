@@ -2526,21 +2526,29 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
+ "clap",
+ "methods",
+ "ogzkp-core",
+ "predicates",
+ "tokio",
+ "tracing-subscriber 0.3.19",
+]
+
+[[package]]
+name = "ogzkp-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
  "base64",
  "bincode",
  "bitcoin",
- "clap",
  "flate2",
  "hex",
- "methods",
- "predicates",
  "reqwest",
  "risc0-zkvm",
  "rs_merkle",
  "serde",
- "serde_json",
- "tokio",
- "tracing-subscriber 0.3.19",
+ "time",
 ]
 
 [[package]]

@@ -27,7 +27,7 @@ jobs:
           ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run unit tests
-        run: cargo test --bin og-zkp
+        run: cargo test --workspace --lib --bin og-zkp
 
   e2e:
     runs-on: ubuntu-latest

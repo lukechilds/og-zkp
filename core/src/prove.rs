@@ -1,4 +1,3 @@
-use methods::OGZKP_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
 use anyhow::{bail, Context, Result};
@@ -15,8 +14,10 @@ use crate::block_inclusion_proof::{
 };
 use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
+use crate::AddressKind;
 
 pub async fn run(
+    elf: &[u8],
     message: &str,
     signature: &str,
     address: &str,
@@ -37,10 +38,10 @@ pub async fn run(
         .require_network(Network::Bitcoin)
         .context("Address is not a mainnet address")?;
     let address_type = match passed_in_address.address_type() {
-        Some(AddressType::P2pkh) => 0,
-        Some(AddressType::P2sh) => 1, // Assume nested P2WPKH
-        Some(AddressType::P2wpkh) => 2,
-        Some(AddressType::P2tr) => 3,
+        Some(AddressType::P2pkh) => AddressKind::P2pkh,
+        Some(AddressType::P2sh) => AddressKind::P2sh, // Assume nested P2WPKH
+        Some(AddressType::P2wpkh) => AddressKind::P2wpkh,
+        Some(AddressType::P2tr) => AddressKind::P2tr,
         _ => bail!("Unsupported address type"),
     };
 
@@ -96,7 +97,7 @@ pub async fn run(
     let input = (
         message,
         signature_bytes,
-        address_type,
+        address_type as i32,
         transaction,
         spv_proof,
         header_proof,
@@ -113,7 +114,7 @@ pub async fn run(
     let prover = default_prover();
     let opts = risc0_zkvm::ProverOpts::groth16();
     let receipt = prover
-        .prove_with_opts(env, OGZKP_ELF, &opts)
+        .prove_with_opts(env, elf, &opts)
         .context("Proving failed")?
         .receipt;
 
