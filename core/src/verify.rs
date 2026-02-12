@@ -26,6 +26,8 @@ pub fn run(image_id: impl Into<risc0_zkvm::sha::Digest>, receipt_str: &str, json
         println!("OG Status: {month_display}");
         println!("Identity:  {identity}");
         println!();
+        println!("\x1b[32m✓\x1b[0m Proof valid");
+        println!();
     }
     Ok(())
 }
