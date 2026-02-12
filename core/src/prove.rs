@@ -158,13 +158,15 @@ pub async fn run(
         });
         println!("{}", serde_json::to_string_pretty(&output).unwrap());
     } else {
+        let month_display = block_month
+            .parse::<i64>()
+            .ok()
+            .and_then(|ts| time::OffsetDateTime::from_unix_timestamp(ts).ok())
+            .map(|dt| format!("{} {}", dt.month(), dt.year()))
+            .unwrap_or(block_month.clone());
         println!();
-        println!(
-            "Block inclusion root: {:?}",
-            hex::encode(block_inclusion_root)
-        );
-        println!("Block month: {block_month:?}");
-        println!("Identity: {identity:?}");
+        println!("OG Status: {month_display}");
+        println!("Identity:  {identity}");
         println!();
         println!("Proof:");
         println!("{serialized_receipt}");
