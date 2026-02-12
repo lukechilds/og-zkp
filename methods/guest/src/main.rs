@@ -1,5 +1,6 @@
-use ogzkp_core::verify_header_merkle_proof;
 use risc0_zkvm::guest::env;
+
+use rs_merkle::{algorithms::Sha256, MerkleProof};
 
 use bitcoin::hashes::Hash as _;
 use bitcoin::secp256k1::Secp256k1;
@@ -9,6 +10,21 @@ use bitcoin::{consensus, script::ScriptBuf, MerkleBlock, PublicKey, Transaction,
 use time::{Date, OffsetDateTime};
 
 pub const OGZKP_MESSAGE_PREFIX: &str = "og-zkp ";
+
+// Verify the single-blob proof against an expected root.
+// Inlined from host/src/block_inclusion_proof.rs to avoid pulling in shared crates that
+// could accidentily break the guest program image id.
+fn verify_header_merkle_proof(
+    leaf_hash_be: [u8; 32],
+    blob: &[u8],
+    expected_root: [u8; 32],
+) -> bool {
+    let index = u32::from_le_bytes(blob[0..4].try_into().unwrap()) as usize;
+    let total_leaves_count = u32::from_le_bytes(blob[4..8].try_into().unwrap()) as usize;
+    let proof_bytes = &blob[8..];
+    let proof = MerkleProof::<Sha256>::from_bytes(proof_bytes).unwrap();
+    proof.verify(expected_root, &[index], &[leaf_hash_be], total_leaves_count)
+}
 
 fn pubkey_to_output_script(pubkey: PublicKey, address_type: i32) -> ScriptBuf {
     match address_type {

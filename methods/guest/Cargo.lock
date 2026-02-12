@@ -871,17 +871,9 @@ version = "0.1.0"
 dependencies = [
  "bitcoin",
  "hex",
- "ogzkp-core",
  "risc0-zkvm",
- "time",
-]
-
-[[package]]
-name = "ogzkp-core"
-version = "0.1.0"
-dependencies = [
- "hex",
  "rs_merkle",
+ "time",
 ]
 
 [[package]]

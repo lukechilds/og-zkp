@@ -9,8 +9,9 @@ use std::str::FromStr;
 
 use base64::prelude::*;
 
-use ogzkp_core::{generate_header_merkle_proof, headers_merkle_root};
-
+use crate::block_inclusion_proof::{
+    generate_header_merkle_proof, headers_merkle_root, verify_header_merkle_proof,
+};
 use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
 
@@ -75,6 +76,10 @@ pub async fn run(
     let header_proof =
         generate_header_merkle_proof(block_hash).expect("Header not found in known header set");
     let block_inclusion_root = headers_merkle_root();
+    assert!(
+        verify_header_merkle_proof(block_hash, &header_proof, block_inclusion_root),
+        "Failed to generate valid block inclusion proof"
+    );
 
     // Bundle input
     let input = (

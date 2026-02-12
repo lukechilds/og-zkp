@@ -1,4 +1,5 @@
 // Modules
+mod block_inclusion_proof;
 mod mempool_api;
 mod receipt;
 

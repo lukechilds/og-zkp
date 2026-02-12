@@ -2532,22 +2532,14 @@ dependencies = [
  "flate2",
  "hex",
  "methods",
- "ogzkp-core",
  "predicates",
  "reqwest",
  "risc0-zkvm",
+ "rs_merkle",
  "serde",
  "serde_json",
  "tokio",
  "tracing-subscriber 0.3.19",
-]
-
-[[package]]
-name = "ogzkp-core"
-version = "0.1.0"
-dependencies = [
- "hex",
- "rs_merkle",
 ]
 
 [[package]]
