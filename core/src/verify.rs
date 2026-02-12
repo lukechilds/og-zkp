@@ -12,8 +12,8 @@ pub fn run(image_id: impl Into<risc0_zkvm::sha::Digest>, receipt_str: &str) -> R
         "Block inclusion root: {:?}",
         hex::encode(block_inclusion_root)
     );
-    println!("Block month: {:?}", block_month);
-    println!("Identity: {:?}", identity);
+    println!("Block month: {block_month:?}");
+    println!("Identity: {identity:?}");
     println!();
     Ok(())
 }

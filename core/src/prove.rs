@@ -56,7 +56,7 @@ pub async fn run(
                 Ok(None) => bail!("No transactions found for address"),
                 Err(e) => bail!("Failed to fetch transactions: {}", e),
             };
-            println!("First seen txid: {}", txid);
+            println!("First seen txid: {txid}");
 
             println!("Fetching raw tx...");
             fetch_raw_tx(mempool_api, &txid)
@@ -129,14 +129,14 @@ pub async fn run(
         "Block inclusion root: {:?}",
         hex::encode(block_inclusion_root)
     );
-    println!("Block month: {:?}", block_month);
-    println!("Identity: {:?}", identity);
+    println!("Block month: {block_month:?}");
+    println!("Identity: {identity:?}");
 
     // Serialize the receipt and print as bech32m
     let serialized_receipt = serialize_receipt(&receipt)?;
     println!();
     println!("Proof:");
-    println!("{}", serialized_receipt);
+    println!("{serialized_receipt}");
 
     Ok(())
 }

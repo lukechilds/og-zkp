@@ -29,8 +29,7 @@ pub fn run(input: Input) -> Output {
     // Assert message starts with "og-zkp"
     assert!(
         message.starts_with(OGZKP_MESSAGE_PREFIX),
-        "Message does not start with '{}'",
-        OGZKP_MESSAGE_PREFIX
+        "Message does not start with '{OGZKP_MESSAGE_PREFIX}'"
     );
 
     // Recover pubkey from the signed message

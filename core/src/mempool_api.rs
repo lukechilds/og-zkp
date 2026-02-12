@@ -12,9 +12,9 @@ async fn fetch_txids(
     after_txid: Option<&str>,
 ) -> Result<Vec<String>> {
     // Build the URL
-    let mut url = format!("{}/address/{}/txs", endpoint, address);
+    let mut url = format!("{endpoint}/address/{address}/txs");
     if let Some(cursor) = after_txid {
-        url.push_str(&format!("?after_txid={}", cursor));
+        url.push_str(&format!("?after_txid={cursor}"));
     }
 
     // Send the request
@@ -63,7 +63,7 @@ pub async fn find_first_seen_txid(
 
 pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
-    let url = format!("{}/tx/{}/merkleblock-proof", endpoint, txid);
+    let url = format!("{endpoint}/tx/{txid}/merkleblock-proof");
     let resp = client.get(url).send().await?;
     let proof: String = resp.text().await?;
     Ok(proof)
@@ -71,7 +71,7 @@ pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String> {
 
 pub async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
-    let url = format!("{}/tx/{}/hex", endpoint, txid);
+    let url = format!("{endpoint}/tx/{txid}/hex");
     let resp = client.get(url).send().await?;
     let tx: String = resp.text().await?;
     Ok(tx)
