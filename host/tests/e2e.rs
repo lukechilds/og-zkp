@@ -15,7 +15,7 @@ fn prove_then_verify(
     transaction: Option<&str>,
     spv_proof: Option<&str>,
     expected_identity: &str,
-    expected_block_month: &str,
+    expected_og_status: &str,
 ) {
     // Build command
     let mut prove_cmd = Command::cargo_bin("og-zkp").expect("binary exists");
@@ -60,14 +60,14 @@ fn prove_then_verify(
         .arg(&receipt)
         .assert()
         .success()
-        // Check for expected identity and block month in output
+        // Check for expected identity and OG status in output
         .stdout(predicate::str::contains(format!(
-            "Identity: \"{}\"",
+            "Identity:  {}",
             expected_identity
         )))
         .stdout(predicate::str::contains(format!(
-            "Block month: \"{}\"",
-            expected_block_month
+            "OG Status: {}",
+            expected_og_status
         )));
 }
 
@@ -89,7 +89,7 @@ fn prove_then_verify_p2pkh() {
 
     // Expected outputs
     let expected_identity = "x.com/lukechilds";
-    let expected_block_month = "1538352000";
+    let expected_og_status = "October 2018";
 
     prove_then_verify(
         message,
@@ -98,7 +98,7 @@ fn prove_then_verify_p2pkh() {
         transaction,
         spv_proof,
         expected_identity,
-        expected_block_month,
+        expected_og_status,
     );
 }
 
@@ -120,7 +120,7 @@ fn prove_then_verify_p2sh_p2wpkh() {
 
     // Expected outputs
     let expected_identity = "x.com/lukechilds";
-    let expected_block_month = "1551398400";
+    let expected_og_status = "March 2019";
 
     prove_then_verify(
         message,
@@ -129,7 +129,7 @@ fn prove_then_verify_p2sh_p2wpkh() {
         transaction,
         spv_proof,
         expected_identity,
-        expected_block_month,
+        expected_og_status,
     );
 }
 
@@ -151,7 +151,7 @@ fn prove_then_verify_p2wpkh() {
 
     // Expected outputs
     let expected_identity = "x.com/lukechilds";
-    let expected_block_month = "1551398400";
+    let expected_og_status = "March 2019";
 
     prove_then_verify(
         message,
@@ -160,7 +160,7 @@ fn prove_then_verify_p2wpkh() {
         transaction,
         spv_proof,
         expected_identity,
-        expected_block_month,
+        expected_og_status,
     );
 }
 
@@ -182,7 +182,7 @@ fn prove_then_verify_p2tr() {
 
     // Expected outputs
     let expected_identity = "x.com/lukechilds";
-    let expected_block_month = "1740787200";
+    let expected_og_status = "March 2025";
 
     prove_then_verify(
         message,
@@ -191,7 +191,7 @@ fn prove_then_verify_p2tr() {
         transaction,
         spv_proof,
         expected_identity,
-        expected_block_month,
+        expected_og_status,
     );
 }
 
