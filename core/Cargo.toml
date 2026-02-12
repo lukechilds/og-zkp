@@ -18,9 +18,10 @@ flate2 = { version = "1", default-features = false, features = ["rust_backend"],
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], optional = true }
 risc0-zkvm = { version = "^3.0.1", features = ["prove"], optional = true }
 serde = { version = "1.0", optional = true }
+serde_json = { version = "1", optional = true }
 
 [dev-dependencies]
 base64 = "0.22.1"
 
 [features]
-host = ["dep:anyhow", "dep:base64", "dep:bincode", "dep:flate2", "dep:reqwest", "dep:risc0-zkvm", "dep:serde", "bitcoin/default"]
+host = ["dep:anyhow", "dep:base64", "dep:bincode", "dep:flate2", "dep:reqwest", "dep:risc0-zkvm", "dep:serde", "dep:serde_json", "bitcoin/default"]

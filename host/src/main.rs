@@ -29,11 +29,17 @@ enum Commands {
         /// Optional mempool API endpoint
         #[arg(long, default_value = "https://mempool.space/api")]
         mempool_api: String,
+        /// Output result as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Verify a serialized receipt and print committed data
     Verify {
         /// Bech32m-encoded serialized receipt
         receipt: String,
+        /// Output result as JSON
+        #[arg(long)]
+        json: bool,
     },
 }
 
@@ -48,6 +54,7 @@ async fn main() -> anyhow::Result<()> {
             transaction,
             spv_proof,
             mempool_api,
+            json,
         } => {
             ogzkp_core::prove::run(
                 methods::OGZKP_ELF,
@@ -57,10 +64,13 @@ async fn main() -> anyhow::Result<()> {
                 &mempool_api,
                 transaction,
                 spv_proof,
+                json,
             )
             .await
         }
-        Commands::Verify { receipt } => ogzkp_core::verify::run(methods::OGZKP_ID, &receipt),
+        Commands::Verify { receipt, json } => {
+            ogzkp_core::verify::run(methods::OGZKP_ID, &receipt, json)
+        }
     }
 }
 

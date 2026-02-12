@@ -24,8 +24,13 @@ pub async fn run(
     mempool_api: &str,
     transaction: Option<String>,
     spv_proof: Option<String>,
+    json: bool,
 ) -> Result<()> {
-    println!("og-zkp");
+    macro_rules! status {
+        ($($arg:tt)*) => { if !json { println!($($arg)*); } }
+    }
+
+    status!("og-zkp");
 
     // Decode the base64 signature
     let signature_bytes = BASE64_STANDARD
@@ -50,15 +55,14 @@ pub async fn run(
         Some(tx) => tx,
         None => {
             // Lookup first-seen txid for this address
-            println!("Looking up first-seen txid for address...");
+            status!("Looking up first-seen txid for address...");
             let txid = match find_first_seen_txid(mempool_api, address).await {
                 Ok(Some(txid)) => txid,
                 Ok(None) => bail!("No transactions found for address"),
                 Err(e) => bail!("Failed to fetch transactions: {}", e),
             };
-            println!("First seen txid: {txid}");
-
-            println!("Fetching raw tx...");
+            status!("First seen txid: {txid}");
+            status!("Fetching raw tx...");
             fetch_raw_tx(mempool_api, &txid)
                 .await
                 .context("Failed to fetch raw transaction")?
@@ -69,7 +73,7 @@ pub async fn run(
     let spv_proof = match spv_proof {
         Some(proof) => proof,
         None => {
-            println!("Fetching transaction inclusion proof...");
+            status!("Fetching transaction inclusion proof...");
             let tx_bytes = hex::decode(&transaction).context("Invalid transaction hex")?;
             let txid = consensus::encode::deserialize::<Transaction>(&tx_bytes)
                 .context("Failed to parse transaction")?
@@ -80,7 +84,7 @@ pub async fn run(
         }
     };
 
-    println!("Generating block inclusion proof...");
+    status!("Generating block inclusion proof...");
     let spv_proof_bytes = hex::decode(&spv_proof).context("Invalid SPV proof hex")?;
     let merkle_block: MerkleBlock =
         consensus::encode::deserialize(&spv_proof_bytes).context("Failed to parse SPV proof")?;
@@ -110,7 +114,7 @@ pub async fn run(
         .context("Failed to build prover environment")?;
 
     // Prove the program and obtain the receipt.
-    println!("Proving...");
+    status!("Proving...");
     let prover = default_prover();
     let opts = risc0_zkvm::ProverOpts::groth16();
     let receipt = prover
@@ -123,20 +127,31 @@ pub async fn run(
         .journal
         .decode()
         .context("Failed to decode receipt journal")?;
-    println!();
-    println!("Proof generated successfully!");
-    println!(
-        "Block inclusion root: {:?}",
-        hex::encode(block_inclusion_root)
-    );
-    println!("Block month: {block_month:?}");
-    println!("Identity: {identity:?}");
 
-    // Serialize the receipt and print as bech32m
+    // Serialize the receipt
     let serialized_receipt = serialize_receipt(&receipt)?;
-    println!();
-    println!("Proof:");
-    println!("{serialized_receipt}");
+
+    if json {
+        let output = serde_json::json!({
+            "block_inclusion_root": hex::encode(block_inclusion_root),
+            "block_month": block_month,
+            "identity": identity,
+            "proof": serialized_receipt,
+        });
+        println!("{}", serde_json::to_string_pretty(&output).unwrap());
+    } else {
+        println!();
+        println!("Proof generated successfully!");
+        println!(
+            "Block inclusion root: {:?}",
+            hex::encode(block_inclusion_root)
+        );
+        println!("Block month: {block_month:?}");
+        println!("Identity: {identity:?}");
+        println!();
+        println!("Proof:");
+        println!("{serialized_receipt}");
+    }
 
     Ok(())
 }
