@@ -45,7 +45,7 @@ pub async fn run(
         }
     }
 
-    status!("og-zkp");
+    status!("og-zkp v{}", env!("CARGO_PKG_VERSION"));
 
     // Decode the base64 signature
     let signature_bytes = BASE64_STANDARD
