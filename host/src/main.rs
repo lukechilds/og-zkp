@@ -71,12 +71,10 @@ mod tests {
     // Update the expected value only after intentional guest changes.
     #[test]
     fn guest_image_id_unchanged() {
-        let expected: [u32; 8] = [
-            3375371137, 2537482033, 3532430041, 1499898363, 3758672109, 1329636390, 747559332,
-            1123749093,
-        ];
+        let expected = "c9301381973ee731d28c9ad95966a1fbe008c8ed4f40a4262c8ed9a442fb0ce5";
+        let actual: String = methods::OGZKP_ID.iter().map(|w| format!("{w:08x}")).collect();
         assert_eq!(
-            methods::OGZKP_ID,
+            actual,
             expected,
             "Guest image ID has changed! This will break verification of existing proofs. \
              If this change is intentional, update the expected value in this test."
