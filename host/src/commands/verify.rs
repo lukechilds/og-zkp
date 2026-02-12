@@ -1,12 +1,13 @@
+use anyhow::{Context, Result};
 use methods::OGZKP_ID;
 
 use crate::receipt::deserialize_receipt;
 
-pub fn run(receipt_str: &str) {
-    let receipt = deserialize_receipt(receipt_str);
-    receipt.verify(OGZKP_ID).unwrap();
+pub fn run(receipt_str: &str) -> Result<()> {
+    let receipt = deserialize_receipt(receipt_str)?;
+    receipt.verify(OGZKP_ID).context("Receipt verification failed")?;
     let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
-        receipt.journal.decode().unwrap();
+        receipt.journal.decode().context("Failed to decode receipt journal")?;
     println!();
     println!(
         "Block inclusion root: {:?}",
@@ -15,4 +16,5 @@ pub fn run(receipt_str: &str) {
     println!("Block month: {:?}", block_month);
     println!("Identity: {:?}", identity);
     println!();
+    Ok(())
 }

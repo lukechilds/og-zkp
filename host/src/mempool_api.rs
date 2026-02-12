@@ -1,3 +1,4 @@
+use anyhow::{bail, Result};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -9,7 +10,7 @@ async fn fetch_txids(
     endpoint: &str,
     address: &str,
     after_txid: Option<&str>,
-) -> Result<Vec<String>, reqwest::Error> {
+) -> Result<Vec<String>> {
     // Build the URL
     let mut url = format!("{}/address/{}/txs", endpoint, address);
     if let Some(cursor) = after_txid {
@@ -35,7 +36,7 @@ async fn fetch_txids(
 pub async fn find_first_seen_txid(
     endpoint: &str,
     address: &str,
-) -> Result<Option<String>, reqwest::Error> {
+) -> Result<Option<String>> {
     // Walk pages using the second-to-last txid as the cursor until only one remains
     let mut after_txid = None;
     loop {
@@ -54,13 +55,13 @@ pub async fn find_first_seen_txid(
         // Set the cursor to the second-to-last txid
         let next_txid = Some(txids[txids.len() - 2].clone());
         if next_txid == after_txid {
-            panic!("This instance of the mempool API does not support pagination");
+            bail!("This instance of the mempool API does not support pagination");
         }
         after_txid = next_txid;
     }
 }
 
-pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String, reqwest::Error> {
+pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let url = format!("{}/tx/{}/merkleblock-proof", endpoint, txid);
     let resp = client.get(url).send().await?;
@@ -68,7 +69,7 @@ pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String, reqwe
     Ok(proof)
 }
 
-pub async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String, reqwest::Error> {
+pub async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let url = format!("{}/tx/{}/hex", endpoint, txid);
     let resp = client.get(url).send().await?;
