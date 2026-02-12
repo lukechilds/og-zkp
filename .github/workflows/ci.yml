@@ -79,4 +79,4 @@ jobs:
           ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run e2e tests
-        run: OGZKP_TEST_MEMPOOL_LOOKUP="1" cargo test --test e2e
+        run: OG_ZKP_TEST_MEMPOOL_LOOKUP="1" cargo test --test e2e

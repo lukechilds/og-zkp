@@ -8,7 +8,7 @@ use time::{Date, OffsetDateTime};
 use crate::block_inclusion_proof::verify_header_merkle_proof;
 use crate::AddressKind;
 
-const OGZKP_MESSAGE_PREFIX: &str = "og-zkp ";
+const OG_ZKP_MESSAGE_PREFIX: &str = "og-zkp ";
 
 pub type Input = (String, Vec<u8>, i32, String, String, Vec<u8>, [u8; 32]);
 pub type Output = ([u8; 32], String, String);
@@ -28,8 +28,8 @@ pub fn run(input: Input) -> Output {
 
     // Assert message starts with "og-zkp"
     assert!(
-        message.starts_with(OGZKP_MESSAGE_PREFIX),
-        "Message does not start with '{OGZKP_MESSAGE_PREFIX}'"
+        message.starts_with(OG_ZKP_MESSAGE_PREFIX),
+        "Message does not start with '{OG_ZKP_MESSAGE_PREFIX}'"
     );
 
     // Recover pubkey from the signed message
@@ -76,7 +76,7 @@ pub fn run(input: Input) -> Output {
     let block_month = start_of_month(block_time).to_string();
 
     // Grab identity from the message
-    let identity = message.strip_prefix(OGZKP_MESSAGE_PREFIX).unwrap();
+    let identity = message.strip_prefix(OG_ZKP_MESSAGE_PREFIX).unwrap();
 
     (block_inclusion_root, block_month, identity.to_string())
 }

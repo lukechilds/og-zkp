@@ -901,15 +901,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "ogzkp"
+name = "og-zkp"
 version = "0.1.0"
 dependencies = [
- "ogzkp-core",
+ "og-zkp-core",
  "risc0-zkvm",
 ]
 
 [[package]]
-name = "ogzkp-core"
+name = "og-zkp-core"
 version = "0.1.0"
 dependencies = [
  "bitcoin",

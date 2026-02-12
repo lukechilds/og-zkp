@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "ogzkp", version, about = "og-zkp CLI")]
+#[command(name = "og-zkp", version, about = "og-zkp CLI")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -60,8 +60,8 @@ async fn main() -> anyhow::Result<()> {
             json,
             no_animation,
         } => {
-            ogzkp_core::prove::run(
-                methods::OGZKP_ELF,
+            og_zkp_core::prove::run(
+                methods::OG_ZKP_ELF,
                 &message,
                 &signature,
                 &address,
@@ -74,7 +74,7 @@ async fn main() -> anyhow::Result<()> {
             .await
         }
         Commands::Verify { receipt, json } => {
-            ogzkp_core::verify::run(methods::OGZKP_ID, &receipt, json)
+            og_zkp_core::verify::run(methods::OG_ZKP_ID, &receipt, json)
         }
     }
 }
@@ -86,8 +86,8 @@ mod tests {
     // Update the expected value only after intentional guest changes.
     #[test]
     fn guest_image_id_unchanged() {
-        let expected = "1b5aec6a6868eb2a30a93097938841b9efe96a0669cd764ea54fcf066cf04990";
-        let actual: String = methods::OGZKP_ID.iter().map(|w| format!("{w:08x}")).collect();
+        let expected = "2ea760bdede6c53c04322193b79506b056af57794e16763c4b94b9df191b1615";
+        let actual: String = methods::OG_ZKP_ID.iter().map(|w| format!("{w:08x}")).collect();
         assert_eq!(
             actual,
             expected,

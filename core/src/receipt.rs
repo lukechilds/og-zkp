@@ -10,7 +10,7 @@ fn serialize_bytes(data: &[u8]) -> Result<String> {
     let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
     encoder.write_all(data)?;
     let compressed = encoder.finish()?;
-    let hrp = Hrp::parse("ogzkp").unwrap(); // static string, can't fail
+    let hrp = Hrp::parse("og-zkp").unwrap(); // static string, can't fail
     Ok(bech32::encode::<Bech32m>(hrp, &compressed)?)
 }
 
@@ -48,9 +48,9 @@ mod tests {
     }
 
     #[test]
-    fn encoded_starts_with_ogzkp() {
+    fn encoded_starts_with_og_zkp() {
         let encoded = serialize_bytes(b"test").unwrap();
-        assert!(encoded.starts_with("ogzkp1"));
+        assert!(encoded.starts_with("og-zkp1"));
     }
 
     #[test]

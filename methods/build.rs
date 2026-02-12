@@ -14,6 +14,6 @@ fn main() {
         .unwrap();
 
     let mut opts = HashMap::new();
-    opts.insert("ogzkp", guest_opts);
+    opts.insert("og-zkp", guest_opts);
     risc0_build::embed_methods_with_options(opts);
 }

@@ -2519,7 +2519,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "methods",
- "ogzkp-core",
+ "og-zkp-core",
  "predicates",
  "serde_json",
  "tokio",
@@ -2527,7 +2527,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ogzkp-core"
+name = "og-zkp-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",

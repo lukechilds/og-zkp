@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ogzkp-core = { path = "../core", features = ["host"] }
+og-zkp-core = { path = "../core", features = ["host"] }
 methods = { path = "../methods" }
 clap = { version = "4", features = ["derive"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
