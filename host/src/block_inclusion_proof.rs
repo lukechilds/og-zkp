@@ -52,3 +52,60 @@ fn get_block_hashes() -> Vec<[u8; 32]> {
         })
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Bitcoin genesis block hash (big-endian hex), reversed to little-endian by get_block_hashes()
+    fn genesis_block_hash() -> [u8; 32] {
+        let mut bytes: [u8; 32] = <[u8; 32]>::from_hex(
+            "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+        )
+        .unwrap();
+        bytes.reverse();
+        bytes
+    }
+
+    #[test]
+    fn merkle_root_is_deterministic() {
+        let root1 = headers_merkle_root();
+        let root2 = headers_merkle_root();
+        assert_eq!(root1, root2);
+    }
+
+    #[test]
+    fn generate_proof_for_known_hash() {
+        let proof = generate_header_merkle_proof(genesis_block_hash());
+        assert!(proof.is_some());
+    }
+
+    #[test]
+    fn generate_proof_for_unknown_hash_returns_none() {
+        let proof = generate_header_merkle_proof([0xff; 32]);
+        assert!(proof.is_none());
+    }
+
+    #[test]
+    fn generate_and_verify_proof_round_trip() {
+        let hash = genesis_block_hash();
+        let root = headers_merkle_root();
+        let proof = generate_header_merkle_proof(hash).unwrap();
+        assert!(verify_header_merkle_proof(hash, &proof, root));
+    }
+
+    #[test]
+    fn verify_proof_fails_with_wrong_hash() {
+        let hash = genesis_block_hash();
+        let root = headers_merkle_root();
+        let proof = generate_header_merkle_proof(hash).unwrap();
+        assert!(!verify_header_merkle_proof([0xff; 32], &proof, root));
+    }
+
+    #[test]
+    fn verify_proof_fails_with_wrong_root() {
+        let hash = genesis_block_hash();
+        let proof = generate_header_merkle_proof(hash).unwrap();
+        assert!(!verify_header_merkle_proof(hash, &proof, [0xff; 32]));
+    }
+}
