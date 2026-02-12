@@ -18,3 +18,24 @@ pub fn run(receipt_str: &str) -> Result<()> {
     println!();
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Verify the guest program image ID hasn't changed unexpectedly.
+    // If this test fails it means the guest binary has changed which will invalidate all existing proofs.
+    // Update the expected value only after intentional guest changes.
+    #[test]
+    fn guest_image_id_unchanged() {
+        let expected: [u32; 8] = [
+            2411500237, 3681540482, 3726348527, 4044067061, 3987686267, 558276497, 3763698140,
+            2629674215,
+        ];
+        assert_eq!(
+            OGZKP_ID, expected,
+            "Guest image ID has changed! This will break verification of existing proofs. \
+             If this change is intentional, update the expected value in this test."
+        );
+    }
+}

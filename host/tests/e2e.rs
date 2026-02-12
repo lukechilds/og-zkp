@@ -3,23 +3,6 @@ use predicates::prelude::*;
 use std::env;
 use std::process::Command;
 
-// Verify the guest program image ID hasn't changed unexpectedly.
-// If this test fails it means the guest binary has changed which will invalidate all existing proofs.
-// Update the expected value only after intentional guest changes.
-#[test]
-fn guest_image_id_unchanged() {
-    let expected: [u32; 8] = [
-        2411500237, 3681540482, 3726348527, 4044067061, 3987686267, 558276497, 3763698140,
-        2629674215,
-    ];
-    assert_eq!(
-        methods::OGZKP_ID,
-        expected,
-        "Guest image ID has changed! This will break verification of existing proofs. \
-         If this change is intentional, update the expected value in this test."
-    );
-}
-
 // End-to-end test: prove then verify. Uses RISC0_DEV_MODE.
 // This test exercises the CLI with real network calls unless tx/proof are provided.
 // To keep it fast we rely on dev mode proving which does not produce valid proofs outside of dev mode.
