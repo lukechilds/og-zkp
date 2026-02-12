@@ -81,7 +81,7 @@ mod tests {
     // Update the expected value only after intentional guest changes.
     #[test]
     fn guest_image_id_unchanged() {
-        let expected = "56ca324e6a2e307aee7a30a313859463d0b9154c5a5a4d95aef8d14220491bf9";
+        let expected = "1b5aec6a6868eb2a30a93097938841b9efe96a0669cd764ea54fcf066cf04990";
         let actual: String = methods::OGZKP_ID.iter().map(|w| format!("{w:08x}")).collect();
         assert_eq!(
             actual,
