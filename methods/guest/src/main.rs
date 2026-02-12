@@ -12,11 +12,11 @@ use bitcoin::{consensus, script::ScriptBuf, MerkleBlock, PublicKey, Transaction,
 
 use time::{Date, OffsetDateTime};
 
-pub const OGZKP_MESSAGE_PREFIX: &str = "og-zkp ";
+const OGZKP_MESSAGE_PREFIX: &str = "og-zkp ";
 
 // Verify the single-blob proof against an expected root.
 // Inlined from host/src/block_inclusion_proof.rs to avoid pulling in shared crates that
-// could accidentily break the guest program image id.
+// could accidentally break the guest program image id.
 fn verify_header_merkle_proof(
     leaf_hash_be: [u8; 32],
     blob: &[u8],
@@ -54,7 +54,7 @@ fn pubkey_to_output_script(pubkey: PublicKey, address_type: i32) -> ScriptBuf {
     }
 }
 
-pub fn recover_pubkey_from_bitcoin_signed_message(
+fn recover_pubkey_from_bitcoin_signed_message(
     signature_bytes: &[u8],
     message: &str,
 ) -> Result<PublicKey, MessageSignatureError> {
@@ -66,7 +66,7 @@ pub fn recover_pubkey_from_bitcoin_signed_message(
     Ok(pubkey)
 }
 
-pub fn start_of_month(unix_ts: u32) -> u32 {
+fn start_of_month(unix_ts: u32) -> u32 {
     let ts = OffsetDateTime::from_unix_timestamp(unix_ts.into()).unwrap();
 
     let date = Date::from_calendar_date(ts.year(), ts.month(), 1).unwrap();
@@ -101,7 +101,7 @@ fn main() {
         .expect("Failed to recover pubkey from bitcoin signed message");
 
     // Decode transaction hex
-    let tx_bytes = hex::decode(&tx_hex).expect("Invalid transaction hex");
+    let tx_bytes = hex::decode(tx_hex).expect("Invalid transaction hex");
     let tx: Transaction =
         consensus::encode::deserialize(&tx_bytes).expect("Failed to parse transaction");
 
@@ -118,13 +118,13 @@ fn main() {
 
     // Assert tx inclusion proof is valid for block header
     let txid = tx.compute_txid();
-    let spv_proof_bytes = hex::decode(&spv_proof_hex).expect("Invalid SPV proof hex");
+    let spv_proof_bytes = hex::decode(spv_proof_hex).expect("Invalid SPV proof hex");
     let spv_proof: MerkleBlock =
         consensus::encode::deserialize(&spv_proof_bytes).expect("Failed to parse SPV proof");
     let mut matches: Vec<Txid> = vec![];
-    let mut _indexes: Vec<u32> = vec![];
+    let mut indexes: Vec<u32> = vec![];
     spv_proof
-        .extract_matches(&mut matches, &mut _indexes)
+        .extract_matches(&mut matches, &mut indexes)
         .expect("Failed to extract matches from SPV proof");
     assert!(matches.contains(&txid), "Transaction is not in SPV proof");
 

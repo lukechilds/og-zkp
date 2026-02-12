@@ -47,7 +47,7 @@ pub async fn run(
     if transaction.is_none() {
         // Lookup first-seen txid for this address
         println!("Looking up first-seen txid for address...");
-        let txid = match find_first_seen_txid(mempool_api, &address.to_string()).await {
+        let txid = match find_first_seen_txid(mempool_api, address).await {
             Ok(Some(txid)) => txid,
             Ok(None) => bail!("No transactions found for address"),
             Err(e) => bail!("Failed to fetch transactions: {}", e),
@@ -65,7 +65,7 @@ pub async fn run(
     if spv_proof.is_none() {
         println!("Fetching transaction inclusion proof...");
         let tx_bytes =
-            hex::decode(&transaction.as_deref().unwrap()).context("Invalid transaction hex")?;
+            hex::decode(transaction.as_deref().unwrap()).context("Invalid transaction hex")?;
         let txid = consensus::encode::deserialize::<Transaction>(&tx_bytes)
             .context("Failed to parse transaction")?
             .compute_txid();
@@ -78,7 +78,7 @@ pub async fn run(
 
     println!("Generating block inclusion proof...");
     let spv_proof_bytes =
-        hex::decode(&spv_proof.as_deref().unwrap()).context("Invalid SPV proof hex")?;
+        hex::decode(spv_proof.as_deref().unwrap()).context("Invalid SPV proof hex")?;
     let merkle_block: MerkleBlock =
         consensus::encode::deserialize(&spv_proof_bytes).context("Failed to parse SPV proof")?;
     let block_hash = merkle_block.header.block_hash().to_byte_array();
