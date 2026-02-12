@@ -1,3 +1,6 @@
+// WARNING: Any changes to this file including dependency updates will change the guest program image id and invalidate
+//all existing proofs.
+
 use risc0_zkvm::guest::env;
 
 use rs_merkle::{algorithms::Sha256, MerkleProof};
