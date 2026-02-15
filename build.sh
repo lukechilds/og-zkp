@@ -101,6 +101,75 @@ cmd_release() {
     cmd_checksums
 }
 
+cmd_blockhashes() {
+    local rpc_url="${RPC_URL:-http://127.0.0.1:8332}"
+    local output="$ROOT/core/src/blockhashes.txt"
+    local batch_size=500
+    local max_retries=5
+
+    # Build auth: user/pass takes priority, then cookie file
+    local auth_header=""
+    if [[ -n "${RPC_USER:-}" && -n "${RPC_PASS:-}" ]]; then
+        auth_header="Authorization: Basic $(printf '%s:%s' "$RPC_USER" "$RPC_PASS" | base64)"
+    else
+        local cookie_file="${RPC_COOKIE:-$HOME/.bitcoin/.cookie}"
+        if [[ ! -f "$cookie_file" ]]; then
+            echo "Error: cookie file not found at $cookie_file" >&2
+            echo "Set RPC_USER/RPC_PASS or RPC_COOKIE" >&2
+            exit 1
+        fi
+        auth_header="Authorization: Basic $(base64 < "$cookie_file")"
+    fi
+
+    rpc_call() {
+        local data="$1"
+        local attempt
+        for (( attempt=1; attempt<=max_retries; attempt++ )); do
+            local result
+            if result=$(curl -sf --max-time 120 -X POST \
+                -H "Content-Type: application/json" \
+                -H "$auth_header" \
+                -d "$data" \
+                "$rpc_url"); then
+                echo "$result"
+                return 0
+            fi
+            echo "Request failed (attempt $attempt/$max_retries), retrying in ${attempt}s..." >&2
+            sleep "$attempt"
+        done
+        echo "Request failed after $max_retries attempts" >&2
+        return 1
+    }
+
+    # Get chain height
+    local height
+    height=$(rpc_call '{"jsonrpc":"1.0","method":"getblockcount","params":[]}' | jq -r '.result')
+    echo "Fetching $((height + 1)) block hashes in batches of $batch_size..." >&2
+
+    > "$output"
+    for (( start=0; start<=height; start+=batch_size )); do
+        local end=$(( start + batch_size - 1 ))
+        if (( end > height )); then end=$height; fi
+
+        # Build batch JSON-RPC request
+        local batch="["
+        for (( i=start; i<=end; i++ )); do
+            if (( i > start )); then batch+=","; fi
+            batch+="{\"jsonrpc\":\"1.0\",\"id\":$i,\"method\":\"getblockhash\",\"params\":[$i]}"
+        done
+        batch+="]"
+
+        rpc_call "$batch" | jq -r 'sort_by(.id) | .[].result' >> "$output"
+
+        if (( end > 0 && (end + 1) % 10000 < batch_size )); then
+            printf '%d/%d blocks (%.1f%%)\n' "$((end + 1))" "$((height + 1))" \
+                "$(echo "($end + 1) * 100 / ($height + 1)" | bc -l)" >&2
+        fi
+    done
+
+    echo "Wrote $((height + 1)) block hashes to $output" >&2
+}
+
 cmd_clean() {
     rm -rf "$DIST"
     cargo clean
@@ -110,11 +179,12 @@ case "${1:-}" in
     guest)     cmd_guest ;;
     host)      shift; cmd_build "$@" ;;
     docker)    cmd_docker ;;
-    checksums) cmd_checksums ;;
-    release)   cmd_release ;;
-    clean)     cmd_clean ;;
+    checksums)    cmd_checksums ;;
+    blockhashes)  shift; cmd_blockhashes "$@" ;;
+    release)      cmd_release ;;
+    clean)        cmd_clean ;;
     *)
-        echo "Usage: $0 {guest|host [target]|docker|checksums|release|clean}"
+        echo "Usage: $0 {guest|host [target]|docker|checksums|blockhashes|release|clean}"
         exit 1
         ;;
 esac
