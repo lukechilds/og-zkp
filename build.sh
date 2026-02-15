@@ -62,7 +62,7 @@ cmd_build_one() {
             -v cargo-cache:/usr/local/cargo/registry \
             -e RISC0_SKIP_BUILD=1 \
             -e CARGO_TARGET_DIR=/app/target \
-            rust:bookworm \
+            rust:1.88.0-trixie \
             cargo build --release --target "$target"
     fi
     mkdir -p "$DIST"
