@@ -6,6 +6,9 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+
       - name: Checkout
         uses: actions/checkout@v4
 
