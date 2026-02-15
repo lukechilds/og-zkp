@@ -26,8 +26,11 @@ jobs:
           ~/.risc0/bin/rzup install rust 1.88.0
           ~/.risc0/bin/rzup install cpp 2024.1.5
 
+      - name: Build guest (Docker, reproducible)
+        run: RISC0_USE_DOCKER=1 cargo build -p methods --release
+
       - name: Run unit tests
-        run: cargo test --workspace --lib --bin og-zkp
+        run: RISC0_SKIP_BUILD=1 cargo test --workspace --lib --bin og-zkp
 
   e2e:
     runs-on: ubuntu-latest
