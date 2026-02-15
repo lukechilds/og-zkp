@@ -43,7 +43,7 @@ is_native() {
 }
 
 cmd_guest() {
-    RISC0_USE_DOCKER=1 cargo build -p methods --release
+    cargo build -p methods --release
 }
 
 cmd_build_one() {

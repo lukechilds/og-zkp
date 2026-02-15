@@ -53,10 +53,13 @@ fn main() {
         )
         .unwrap();
         println!("cargo:rerun-if-changed={}", methods_path.display());
-    } else if !std::env::var("RISC0_USE_DOCKER")
+    } else if !std::env::var("RISC0_NATIVE_BUILD")
         .unwrap_or_default()
         .is_empty()
     {
+        risc0_build::embed_methods();
+    } else {
+        // Default: Docker build for reproducible guest binaries
         let docker_opts = risc0_build::DockerOptionsBuilder::default()
             .root_dir(root)
             .build()
@@ -69,7 +72,5 @@ fn main() {
         let mut opts = HashMap::new();
         opts.insert("og-zkp", guest_opts);
         risc0_build::embed_methods_with_options(opts);
-    } else {
-        risc0_build::embed_methods();
     }
 }
