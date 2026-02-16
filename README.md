@@ -90,3 +90,7 @@ Inside the guest, every step is proven in zero-knowledge:
 6. **Collapse the timestamp to a calendar month.** The block header's timestamp is rounded down to the first second of its calendar month. This is what gets committed — not the exact block height or date.
 
 7. **Commit the output.** The guest program outputs exactly three values: the block inclusion Merkle root, the calendar month timestamp, and the identity string. Nothing else leaves the VM.
+
+## License
+
+MIT © Luke Childs
