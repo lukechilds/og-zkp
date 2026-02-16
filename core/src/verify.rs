@@ -30,11 +30,10 @@ pub fn run(
             .and_then(|ts| time::OffsetDateTime::from_unix_timestamp(ts).ok())
             .map(|dt| format!("{} {}", dt.month(), dt.year()))
             .unwrap_or(block_month.clone());
-        println!();
         println!("OG Status: {month_display}");
         println!("Identity:  {identity}");
         println!();
-        println!("\x1b[32m✓\x1b[0m Proof valid");
+        println!("\x1b[32m✓\x1b[0m Proof is valid");
     }
     Ok(())
 }
