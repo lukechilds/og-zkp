@@ -48,14 +48,20 @@ cmd_guest() {
 
 cmd_build_one() {
     local target="$1"
+    local package="${2:-og-zkp}"
+    local binary_name
+    case "$package" in
+        og-zkp-verifier) binary_name="og-zkp-verifier" ;;
+        *)               binary_name="og-zkp" ;;
+    esac
     if is_native "$target"; then
-        echo "Building $target (native)"
+        echo "Building $package for $target (native)"
         RISC0_SKIP_BUILD=1 CARGO_TARGET_DIR="$ROOT/target" \
-            cargo build --release --target "$target"
+            cargo build --release --target "$target" -p "$package"
     else
         local arch
         arch="$(docker_arch "$target")"
-        echo "Building $target (docker linux/$arch)"
+        echo "Building $package for $target (docker linux/$arch)"
         docker run --rm \
             --platform "linux/$arch" \
             -v "$ROOT":/app -w /app \
@@ -63,10 +69,10 @@ cmd_build_one() {
             -e RISC0_SKIP_BUILD=1 \
             -e CARGO_TARGET_DIR=/app/target \
             rust:1.88.0-trixie \
-            cargo build --release --target "$target"
+            cargo build --release --target "$target" -p "$package"
     fi
     mkdir -p "$DIST"
-    cp "$ROOT/target/$target/release/og-zkp" "$DIST/og-zkp-$target"
+    cp "$ROOT/target/$target/release/$binary_name" "$DIST/$binary_name-$target"
 }
 
 cmd_build() {
@@ -77,6 +83,11 @@ cmd_build() {
             cmd_build_one "$t"
         done
     fi
+}
+
+cmd_verifier() {
+    local target="${1:-x86_64-unknown-linux-gnu}"
+    cmd_build_one "$target" og-zkp-verifier
 }
 
 cmd_docker() {
@@ -178,13 +189,14 @@ cmd_clean() {
 case "${1:-}" in
     guest)     cmd_guest ;;
     host)      shift; cmd_build "$@" ;;
+    verifier)  shift; cmd_verifier "$@" ;;
     docker)    cmd_docker ;;
     checksums)    cmd_checksums ;;
     blockhashes)  shift; cmd_blockhashes "$@" ;;
     release)      cmd_release ;;
     clean)        cmd_clean ;;
     *)
-        echo "Usage: $0 {guest|host [target]|docker|checksums|blockhashes|release|clean}"
+        echo "Usage: $0 {guest|host [target]|verifier [target]|docker|checksums|blockhashes|release|clean}"
         exit 1
         ;;
 esac
