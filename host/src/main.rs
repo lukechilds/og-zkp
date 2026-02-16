@@ -44,6 +44,12 @@ enum Commands {
         #[arg(long)]
         json: bool,
     },
+    /// Display build info (image ID, block inclusion data, etc.)
+    Info {
+        /// Output result as JSON
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[tokio::main]
@@ -76,6 +82,9 @@ async fn main() -> anyhow::Result<()> {
         Commands::Verify { receipt, json } => {
             og_zkp_core::verify::run(methods::OG_ZKP_ID, &receipt, json)
         }
+        Commands::Info { json } => {
+            og_zkp_core::info::run(env!("CARGO_PKG_VERSION"), &methods::OG_ZKP_ID, json)
+        }
     }
 }
 
@@ -86,7 +95,7 @@ mod tests {
     // Update the expected value only after intentional guest changes.
     #[test]
     fn guest_image_id_unchanged() {
-        let expected = "2ea760bdede6c53c04322193b79506b056af57794e16763c4b94b9df191b1615";
+        let expected = include_str!("../expected-image-id");
         let actual: String = methods::OG_ZKP_ID
             .iter()
             .map(|w| format!("{w:08x}"))

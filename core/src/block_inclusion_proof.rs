@@ -46,7 +46,7 @@ pub fn generate_header_merkle_proof(target_hash_be: [u8; 32]) -> Option<Vec<u8>>
 use hex::FromHex;
 
 #[cfg(feature = "host")]
-fn get_block_hashes() -> Vec<[u8; 32]> {
+pub(crate) fn get_block_hashes() -> Vec<[u8; 32]> {
     include_str!("blockhashes.txt")
         .lines()
         .map(str::trim)

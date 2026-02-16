@@ -14,3 +14,10 @@ pub mod receipt;
 pub mod verify;
 
 pub use address_kind::AddressKind;
+
+#[cfg(feature = "host")]
+pub mod info;
+
+// For some reason adding new members or comments in the middle of this file breaks the program hash.
+// Likely due to some kind of line number debug info making it into the risc0 guest binary.
+// Adding new host only members at the end of this file does not break the guest program hash.

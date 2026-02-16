@@ -79,6 +79,17 @@ jobs:
       - name: Build
         run: ./build.sh host ${{ matrix.target }}
 
+      - name: Verify image ID
+        run: |
+          chmod +x dist/og-zkp-${{ matrix.target }}
+          expected=$(cat host/expected-image-id)
+          actual=$(dist/og-zkp-${{ matrix.target }} info --json | jq -r '.image_id')
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::Image ID mismatch! Expected: $expected, Got: $actual"
+            exit 1
+          fi
+          echo "Image ID verified: $actual"
+
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:

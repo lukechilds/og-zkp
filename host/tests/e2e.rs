@@ -208,12 +208,18 @@ fn prove_with_json() -> Value {
         .unwrap()
         .env("RISC0_DEV_MODE", "1")
         .args([
-            "prove", "--json",
-            "--message", P2PKH_MESSAGE,
-            "--signature", P2PKH_SIGNATURE,
-            "--address", P2PKH_ADDRESS,
-            "--transaction", P2PKH_TRANSACTION,
-            "--spv-proof", P2PKH_SPV_PROOF,
+            "prove",
+            "--json",
+            "--message",
+            P2PKH_MESSAGE,
+            "--signature",
+            P2PKH_SIGNATURE,
+            "--address",
+            P2PKH_ADDRESS,
+            "--transaction",
+            P2PKH_TRANSACTION,
+            "--spv-proof",
+            P2PKH_SPV_PROOF,
         ])
         .assert()
         .success()
@@ -251,5 +257,59 @@ fn verify_json_output() {
     assert!(json["block_inclusion_root"].is_string());
     assert_eq!(json["block_month"], "1538352000");
     assert_eq!(json["identity"], "x.com/lukechilds");
-    assert!(json.get("proof").is_none(), "verify should not include proof field");
+    assert!(
+        json.get("proof").is_none(),
+        "verify should not include proof field"
+    );
+}
+
+const EXPECTED_IMAGE_ID: &str = include_str!("../expected-image-id");
+const EXPECTED_INCLUSION_ROOT: &str =
+    "645193f7e45302f503f14d6bdc593a12ee954b5ca844d38affaae51febb77a3e";
+const EXPECTED_INCLUSION_TIP: &str =
+    "00000000000000000000f97a2e344937318c96249ea6b204b3f1996796bcc72b";
+const EXPECTED_INCLUSION_HEIGHT: u64 = 936729;
+
+#[test]
+fn info_text_output() {
+    Command::cargo_bin("og-zkp")
+        .unwrap()
+        .arg("info")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(format!(
+            "Version:                  {}",
+            env!("CARGO_PKG_VERSION")
+        )))
+        .stdout(predicate::str::contains(format!(
+            "Image ID:                 {EXPECTED_IMAGE_ID}"
+        )))
+        .stdout(predicate::str::contains(format!(
+            "Block inclusion root:     {EXPECTED_INCLUSION_ROOT}"
+        )))
+        .stdout(predicate::str::contains(format!(
+            "Block inclusion tip:      {EXPECTED_INCLUSION_TIP}"
+        )))
+        .stdout(predicate::str::contains(format!(
+            "Block inclusion height:   {EXPECTED_INCLUSION_HEIGHT}"
+        )));
+}
+
+#[test]
+fn info_json_output() {
+    let output = Command::cargo_bin("og-zkp")
+        .unwrap()
+        .args(["info", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: Value = serde_json::from_slice(&output).expect("stdout is valid JSON");
+    assert_eq!(json["version"], env!("CARGO_PKG_VERSION"));
+    assert_eq!(json["image_id"], EXPECTED_IMAGE_ID);
+    assert_eq!(json["block_inclusion_root"], EXPECTED_INCLUSION_ROOT);
+    assert_eq!(json["block_inclusion_tip"], EXPECTED_INCLUSION_TIP);
+    assert_eq!(json["block_inclusion_height"], EXPECTED_INCLUSION_HEIGHT);
 }
