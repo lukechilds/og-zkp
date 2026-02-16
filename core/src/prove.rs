@@ -164,10 +164,12 @@ pub async fn run(
             .and_then(|ts| time::OffsetDateTime::from_unix_timestamp(ts).ok())
             .map(|dt| format!("{} {}", dt.month(), dt.year()))
             .unwrap_or(block_month.clone());
+        println!();
         println!("OG Status: {month_display}");
         println!("Identity:  {identity}");
         println!();
-        println!("Proof:");
+        println!("Submit your proof at https://og-zkp.com");
+        println!();
         println!("{serialized_receipt}");
     }
 
