@@ -2,11 +2,19 @@ use anyhow::{Context, Result};
 
 use crate::receipt::deserialize_receipt;
 
-pub fn run(image_id: impl Into<risc0_zkvm::sha::Digest>, receipt_str: &str, json: bool) -> Result<()> {
+pub fn run(
+    image_id: impl Into<risc0_zkvm::sha::Digest>,
+    receipt_str: &str,
+    json: bool,
+) -> Result<()> {
     let receipt = deserialize_receipt(receipt_str)?;
-    receipt.verify(image_id).context("Receipt verification failed")?;
-    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) =
-        receipt.journal.decode().context("Failed to decode receipt journal")?;
+    receipt
+        .verify(image_id)
+        .context("Receipt verification failed")?;
+    let (block_inclusion_root, block_month, identity): ([u8; 32], String, String) = receipt
+        .journal
+        .decode()
+        .context("Failed to decode receipt journal")?;
 
     if json {
         let output = serde_json::json!({
@@ -27,7 +35,6 @@ pub fn run(image_id: impl Into<risc0_zkvm::sha::Digest>, receipt_str: &str, json
         println!("Identity:  {identity}");
         println!();
         println!("\x1b[32m✓\x1b[0m Proof valid");
-        println!();
     }
     Ok(())
 }
