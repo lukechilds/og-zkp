@@ -64,15 +64,15 @@ pub async fn find_first_seen_txid(
 pub async fn fetch_spv_proof(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let url = format!("{endpoint}/tx/{txid}/merkleblock-proof");
-    let resp = client.get(url).send().await?;
-    let proof: String = resp.text().await?;
+    let resp = client.get(url).send().await?.error_for_status()?;
+    let proof = resp.text().await?.trim().to_string();
     Ok(proof)
 }
 
 pub async fn fetch_raw_tx(endpoint: &str, txid: &str) -> Result<String> {
     let client = reqwest::Client::new();
     let url = format!("{endpoint}/tx/{txid}/hex");
-    let resp = client.get(url).send().await?;
-    let tx: String = resp.text().await?;
+    let resp = client.get(url).send().await?.error_for_status()?;
+    let tx = resp.text().await?.trim().to_string();
     Ok(tx)
 }
