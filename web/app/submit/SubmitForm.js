@@ -40,7 +40,7 @@ export default function SubmitForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor="proof">paste your proof string (starts with og-zkp1...)</label>
+      <label htmlFor="proof">paste your proof string (starts with og-zkp1...) — <a href="https://github.com/lukechilds/og-zkp?tab=readme-ov-file#example" target="_blank" rel="noopener noreferrer">how to generate a proof</a></label>
       <textarea
         id="proof"
         name="proof"
