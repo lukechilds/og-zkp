@@ -12,6 +12,8 @@ The verifier learns only two things: your identity and the month you first recei
 
 A proof alone only shows that _someone_ with a particular Bitcoin key claims a given identity. You should also verify that the identity attests back to the same proof. [og-zkp.com](https://og-zkp.com) handles this with a Keybase-style identity verification system. After submitting a proof, you publish an attestation from the linked identity (a tweet or Nostr note), and [og-zkp.com](https://og-zkp.com) verifies that both directions match before marking the proof as verified.
 
+[![](og-zkp.com.png)](https://og-zkp.com)
+
 ## Example
 
 ### Sign
