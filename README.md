@@ -8,8 +8,6 @@ You sign a message with a Bitcoin private key. The og-zkp prover will then trace
 
 The verifier learns only two things: your identity and the month you first received Bitcoin. Nothing else leaks.
 
-You should be sure to not just verify that a proof commits to an identity. But also that an identity commits back to the same proof. [og-zkp.com](https://og-zkp.com) provides a Keybase style identity proof publishing system and verifies all proofs are attested in both directions.
-
 ## Example
 
 ### Sign
@@ -71,7 +69,7 @@ docker run -it --net none ghcr.io/lukechilds/og-zkp prove --message "og-zkp x.co
 
 ## How it works
 
-The prover is split into a **host** and a **guest**. The host runs outside the VM and gathers inputs: it looks up the address's first-seen transaction via mempool.space, fetches the raw transaction and SPV proof, and generates a Merkle proof against the compiled-in set of all Bitcoin block hashes. It then passes all of this into the [RISC Zero](https://risczero.com) zkVM guest program.
+The prover is split into a host and a guest. The host runs outside the VM and gathers inputs. It looks up the address's first-seen transaction via mempool.space, fetches the raw transaction and SPV proof, and generates a Merkle proof against the compiled-in set of all Bitcoin block hashes. It then passes all of this into the [RISC Zero](https://risczero.com) zkVM guest program.
 
 You can also supply the raw transaction and SPV proof yourself (see [Airgap mode](#airgap-mode)), or point to a self-hosted mempool.space instance with `--mempool-api`.
 
@@ -89,7 +87,7 @@ Inside the guest, every step is proven in zero-knowledge:
 
 6. **Collapse the timestamp to a calendar month.** The block header's timestamp is rounded down to the first second of its calendar month. This is what gets committed — not the exact block height or date.
 
-7. **Commit the output.** The guest program outputs exactly three values: the block inclusion Merkle root, the calendar month timestamp, and the identity string. Nothing else leaves the VM.
+7. **Commit the output.** The guest program outputs exactly three values: the block inclusion Merkle root, the calendar month timestamp, and the identity string.
 
 ## License
 
