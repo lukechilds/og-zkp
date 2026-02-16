@@ -96,6 +96,34 @@ jobs:
           name: og-zkp-${{ matrix.target }}
           path: dist/og-zkp-${{ matrix.target }}
 
+  build-verifier:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Build verifier
+        run: ./build.sh verifier ${{ matrix.target }}
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: og-zkp-verifier-${{ matrix.target }}
+          path: dist/og-zkp-verifier-${{ matrix.target }}
+
   docker:
     needs: build
     runs-on: ubuntu-latest
@@ -128,8 +156,40 @@ jobs:
           docker push ghcr.io/lukechilds/og-zkp:${{ github.ref_name }}
           docker push ghcr.io/lukechilds/og-zkp:latest
 
+  docker-verifier:
+    needs: build-verifier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download linux amd64 verifier binary
+        uses: actions/download-artifact@v4
+        with:
+          name: og-zkp-verifier-x86_64-unknown-linux-gnu
+          path: dist/
+
+      - name: Prepare binary
+        run: chmod +x dist/og-zkp-verifier-x86_64-unknown-linux-gnu
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: ./build.sh docker-verifier
+
+      - name: Push Docker image
+        run: |
+          docker tag ghcr.io/lukechilds/og-zkp-verifier:latest ghcr.io/lukechilds/og-zkp-verifier:${{ github.ref_name }}
+          docker push ghcr.io/lukechilds/og-zkp-verifier:${{ github.ref_name }}
+          docker push ghcr.io/lukechilds/og-zkp-verifier:latest
+
   release:
-    needs: build
+    needs: [build, build-verifier]
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts

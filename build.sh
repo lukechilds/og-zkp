@@ -96,6 +96,13 @@ cmd_docker() {
     rm "$ROOT/docker/og-zkp"
 }
 
+cmd_docker_verifier() {
+    local image="${VERIFIER_IMAGE:-ghcr.io/lukechilds/og-zkp-verifier:latest}"
+    cp "$DIST/og-zkp-verifier-x86_64-unknown-linux-gnu" "$ROOT/docker/og-zkp-verifier"
+    docker build --platform linux/amd64 -t "$image" -f "$ROOT/docker/Dockerfile.verifier" "$ROOT/docker/"
+    rm "$ROOT/docker/og-zkp-verifier"
+}
+
 cmd_checksums() {
     cd "$DIST"
     if command -v sha256sum &>/dev/null; then
@@ -187,16 +194,17 @@ cmd_clean() {
 }
 
 case "${1:-}" in
-    guest)     cmd_guest ;;
-    host)      shift; cmd_build "$@" ;;
-    verifier)  shift; cmd_verifier "$@" ;;
-    docker)    cmd_docker ;;
-    checksums)    cmd_checksums ;;
-    blockhashes)  shift; cmd_blockhashes "$@" ;;
-    release)      cmd_release ;;
-    clean)        cmd_clean ;;
+    guest)            cmd_guest ;;
+    host)             shift; cmd_build "$@" ;;
+    verifier)         shift; cmd_verifier "$@" ;;
+    docker)           cmd_docker ;;
+    docker-verifier)  cmd_docker_verifier ;;
+    checksums)        cmd_checksums ;;
+    blockhashes)      shift; cmd_blockhashes "$@" ;;
+    release)          cmd_release ;;
+    clean)            cmd_clean ;;
     *)
-        echo "Usage: $0 {guest|host [target]|verifier [target]|docker|checksums|blockhashes|release|clean}"
+        echo "Usage: $0 {guest|host [target]|verifier [target]|docker|docker-verifier|checksums|blockhashes|release|clean}"
         exit 1
         ;;
 esac
