@@ -8,9 +8,11 @@ You sign a message with a Bitcoin private key. The og-zkp prover will then trace
 
 The verifier learns only two things: your identity and the month you first received Bitcoin. Nothing else leaks.
 
+You should be sure to not just verify that a proof commits to an identity. But also that an identity commits back to the same proof. [og-zkp.com](https://og-zkp.com) provides a Keybase style identity proof publishing system and verifies all proofs are attested in both directions.
+
 ## Example
 
-Sign a message with your Bitcoin private key. Most good wallets like Bitcoin Core, BlueWallet, Electrum and Sparrow can do this.
+Sign a message with your Bitcoin private key. Most good wallets like Bitcoin Core, BlueWallet, Electrum and Sparrow can do this. All common address types are supported.
 
 ```bash
 $ bitcoin-cli signmessage 1LukeQU5jwebXbMLDVydeH4vFSobRV9rkj "og-zkp x.com/lukechilds"
