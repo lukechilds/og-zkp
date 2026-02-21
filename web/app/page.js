@@ -25,20 +25,20 @@ export default async function Home() {
   }
 
   return (
-    <table>
+    <table className="leaderboard">
       <thead>
         <tr>
           <th className="rank">#</th>
           <th>identity</th>
-          <th>OG status</th>
+          <th>og status</th>
           <th className="type">type</th>
         </tr>
       </thead>
       <tbody>
         {proofs.map((p, i) => (
           <tr key={p.proof_id}>
-            <td className="rank">{i + 1}</td>
-            <td><Link href={`/proof/${p.proof_id}`}>{p.identity}</Link></td>
+            <td className="rank">{String(i + 1).padStart(2, '0')}</td>
+            <td className="identity"><Link href={`/proof/${p.proof_id}`}>{p.identity}</Link></td>
             <td className="month">{formatMonth(p.block_month)}</td>
             <td className="type">{p.identity_type}</td>
           </tr>

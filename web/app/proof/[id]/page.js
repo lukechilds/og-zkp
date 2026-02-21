@@ -56,18 +56,18 @@ export default async function ProofPage({ params }) {
           <div className="field-value">{proof.identity}</div>
         </div>
         <div className="field">
-          <div className="field-label">OG status</div>
+          <div className="field-label">og status</div>
           <div className="field-value">{month}</div>
         </div>
         <div className="field">
-          <div className="field-label">status</div>
+          <div className="field-label">verification</div>
           <div className={`field-value ${isVerified ? 'status-verified' : 'status-pending'}`}>
-            {isVerified ? 'verified' : 'pending attestation'}
+            {isVerified ? '✓ verified' : 'pending attestation'}
           </div>
         </div>
         <div className="field">
-          <div className="field-label">proof ID</div>
-          <div className="field-value" style={{ fontSize: '0.75rem', color: '#666' }}>{proof.proof_id}</div>
+          <div className="field-label">proof id</div>
+          <div className="field-value field-muted">{proof.proof_id}</div>
         </div>
       </div>
 

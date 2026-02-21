@@ -42,10 +42,10 @@ export default function ProofClient({ proof }) {
         />
       )}
 
-      <div className="proof-section">
-        <h2>proof</h2>
-        <div className="proof-string-wrap">
-          <pre className="proof-string">{proof.proof}</pre>
+      <div className="section">
+        <div className="section-title">proof</div>
+        <div className="code-block proof-string">
+          <pre>{proof.proof}</pre>
           <CopyButton text={proof.proof} />
         </div>
       </div>
@@ -56,24 +56,18 @@ export default function ProofClient({ proof }) {
 function AttestationDisplay({ url }) {
   const isXAttestation = url.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/);
 
-  if (isXAttestation) {
-    return (
-      <div className="attestation-section">
-        <h2>attestation</h2>
-        <div className="tweet-embed"></div>
+  return (
+    <div className="section">
+      <div className="section-title">attestation</div>
+      {isXAttestation ? (
         <div className="attestation-link">
           <a href={url} target="_blank" rel="noopener">{url}</a>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="attestation-section">
-      <h2>attestation</h2>
-      <div className="nostr-embed">
-        <pre className="attest-text">{url}</pre>
-      </div>
+      ) : (
+        <div className="code-block">
+          <pre>{url}</pre>
+        </div>
+      )}
     </div>
   );
 }
@@ -108,15 +102,15 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
   }
 
   return (
-    <div className="attestation-section">
-      <h2>complete attestation</h2>
+    <div className="section">
+      <div className="section-title">complete attestation</div>
       <div className="instructions">
         {isX ? (
           <ol>
             <li>
               Post a tweet from <strong>{identity}</strong> with this exact text:
-              <div className="attest-block">
-                <pre className="attest-text">{attestString}</pre>
+              <div className="code-block">
+                <pre>{attestString}</pre>
                 <CopyButton text={attestString} />
               </div>
             </li>
@@ -126,8 +120,8 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
           <ol>
             <li>
               Sign a Nostr note from your npub with this exact text:
-              <div className="attest-block">
-                <pre className="attest-text">{attestString}</pre>
+              <div className="code-block">
+                <pre>{attestString}</pre>
                 <CopyButton text={attestString} />
               </div>
             </li>
@@ -135,7 +129,7 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
           </ol>
         )}
       </div>
-      <form onSubmit={handleSubmit}>
+      <form className="attest-form" onSubmit={handleSubmit}>
         <label htmlFor="url">{isX ? 'tweet URL' : 'nevent or raw signed event JSON'}</label>
         {isX ? (
           <input
@@ -158,7 +152,7 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
             style={{ height: '80px' }}
           />
         )}
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? 'verifying...' : 'verify attestation'}
         </button>
         {error && <p className="error">{error}</p>}

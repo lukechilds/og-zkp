@@ -40,7 +40,9 @@ export default function SubmitForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor="proof">paste your proof string (starts with og-zkp1...) — <a href="https://github.com/lukechilds/og-zkp?tab=readme-ov-file#example" target="_blank" rel="noopener noreferrer">how to generate a proof</a></label>
+      <label htmlFor="proof">
+        paste your proof string &mdash; <a href="https://github.com/lukechilds/og-zkp?tab=readme-ov-file#example" target="_blank" rel="noopener noreferrer">how to generate a proof</a>
+      </label>
       <textarea
         id="proof"
         name="proof"
@@ -49,7 +51,7 @@ export default function SubmitForm() {
         value={proof}
         onChange={(e) => setProof(e.target.value)}
       />
-      <button type="submit" disabled={submitting}>
+      <button type="submit" className="btn-primary" disabled={submitting}>
         {submitting ? 'verifying...' : 'submit'}
       </button>
       {error && <p className="error">{error}</p>}
