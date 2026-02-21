@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { getDb, migrate } from '../../../lib/db';
 import ProofClient from './ProofClient';
+import NostrName from '../../NostrName';
 
 const getProof = cache(async (id) => {
   const db = getDb();
@@ -69,6 +70,11 @@ export default async function ProofPage({ params }) {
         <div className="field">
           <div className="field-label">identity</div>
           <div className="field-value">{proof.identity}</div>
+          {proof.identity_type === 'nostr' && (
+            <div className="field-sub">
+              <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} short={false} />
+            </div>
+          )}
         </div>
         <div className="field">
           <div className="field-label">og status</div>

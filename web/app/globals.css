@@ -107,7 +107,6 @@ footer .credit { margin-left: auto; }
   width: 2rem;
   font-size: 0.7rem;
   white-space: nowrap;
-  padding-right: 0.5rem;
 }
 
 .leaderboard .crown-cell {
@@ -121,10 +120,14 @@ footer .credit { margin-left: auto; }
   vertical-align: middle;
 }
 
+.leaderboard .identity { width: 27rem; }
+
 .leaderboard .identity a {
   color: var(--text);
   text-decoration: none;
 }
+
+.npub-short { color: var(--text-muted); }
 .leaderboard .identity a:hover { text-decoration: underline; }
 
 .leaderboard .month { color: var(--text-dim); white-space: nowrap; }
@@ -222,6 +225,20 @@ button {
 
 .field-muted { color: var(--text-muted); font-size: 0.7rem; }
 .field-dim { color: var(--text-dim); font-size: 0.75rem; margin-top: 0.15rem; }
+
+.field-sub {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.field-sub-label {
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 0.4rem;
+}
 
 .status-verified { color: var(--green); }
 .status-pending { color: var(--amber); }

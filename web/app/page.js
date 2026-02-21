@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getDb, migrate } from '../lib/db';
+import NostrName from './NostrName';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +63,11 @@ export default async function Home() {
                 </svg>
               )}
             </td>
-            <td className="identity"><Link href={`/proof/${p.proof_id}`}>{p.identity}</Link></td>
+            <td className="identity">
+              <Link href={`/proof/${p.proof_id}`}>
+                {p.identity_type === 'nostr' ? <NostrName npub={p.identity} /> : p.identity}
+              </Link>
+            </td>
             <td className="month">{formatMonth(p.block_month)}</td>
             <td className="age">{formatAge(p.block_month)}</td>
             <td className="type">{p.identity_type}</td>
