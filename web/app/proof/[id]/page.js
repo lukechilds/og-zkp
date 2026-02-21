@@ -30,6 +30,9 @@ export async function generateMetadata({ params }) {
       description: `${status} Bitcoin OG since ${month}`,
       url: `https://og-zkp.com/proof/${proof.proof_id}`,
     },
+    twitter: {
+      card: 'summary_large_image',
+    },
   };
 }
 

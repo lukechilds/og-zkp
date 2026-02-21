@@ -7,6 +7,14 @@ const mono = JetBrains_Mono({ subsets: ['latin'] });
 export const metadata = {
   title: 'og-zkp',
   description: 'Prove your Bitcoin OG status in zero-knowledge',
+  openGraph: {
+    siteName: 'og-zkp',
+    url: 'https://og-zkp.com',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
 };
 
 export default function RootLayout({ children }) {
