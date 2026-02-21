@@ -34,7 +34,7 @@ export default function Nav() {
               <li>Verify your identity by posting an attestation on X or Nostr</li>
               <li>Get listed as a verified Bitcoin OG</li>
             </ol>
-            <p>Your address and exact date are kept private, only the calendar month and identity are revealed.</p>
+            <p>Your address and exact date are kept private and never leave your computer. Only the calendar month and identity are revealed.</p>
           </div>
         </Modal>
       )}
