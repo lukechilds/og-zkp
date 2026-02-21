@@ -75,7 +75,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
                         : p.identity.replace(/^x\.com\//, '@')}
                     </Link>
                     <span className="identity-type">{p.identity_type === 'x' ? 'x.com' : p.identity_type}</span>
-                    <svg className="verified-badge" style={{ animationDelay: `${0.3 + i * 0.12}s` }} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="verified-badge" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
