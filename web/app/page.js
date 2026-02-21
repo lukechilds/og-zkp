@@ -11,6 +11,20 @@ function formatMonth(ts) {
   return months[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
 }
 
+function formatAge(ts) {
+  const n = parseInt(ts, 10);
+  if (isNaN(n)) return '';
+  const then = new Date(n * 1000);
+  const now = new Date();
+  let years = now.getUTCFullYear() - then.getUTCFullYear();
+  let months = now.getUTCMonth() - then.getUTCMonth();
+  if (months < 0) { years--; months += 12; }
+  if (years > 0 && months > 0) return `${years}y ${months}m`;
+  if (years > 0) return `${years}y`;
+  if (months > 0) return `${months}m`;
+  return '<1m';
+}
+
 export default async function Home() {
   const db = getDb();
   await migrate();
@@ -31,6 +45,7 @@ export default async function Home() {
           <th className="rank">#</th>
           <th>identity</th>
           <th>og status</th>
+          <th>age</th>
           <th className="type">type</th>
         </tr>
       </thead>
@@ -40,6 +55,7 @@ export default async function Home() {
             <td className="rank">{String(i + 1).padStart(2, '0')}</td>
             <td className="identity"><Link href={`/proof/${p.proof_id}`}>{p.identity}</Link></td>
             <td className="month">{formatMonth(p.block_month)}</td>
+            <td className="age">{formatAge(p.block_month)}</td>
             <td className="type">{p.identity_type}</td>
           </tr>
         ))}

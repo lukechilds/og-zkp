@@ -115,6 +115,7 @@ footer .credit { margin-left: auto; }
 .leaderboard .identity a:hover { text-decoration: underline; }
 
 .leaderboard .month { color: var(--text-dim); white-space: nowrap; }
+.leaderboard .age { color: var(--text-muted); white-space: nowrap; }
 
 .leaderboard .type {
   color: var(--text-muted);
@@ -207,6 +208,7 @@ button {
 }
 
 .field-muted { color: var(--text-muted); font-size: 0.7rem; }
+.field-dim { color: var(--text-dim); font-size: 0.75rem; margin-top: 0.15rem; }
 
 .status-verified { color: var(--green); }
 .status-pending { color: var(--amber); }
