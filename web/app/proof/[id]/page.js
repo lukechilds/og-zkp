@@ -66,7 +66,7 @@ export default async function ProofPage({ params }) {
         </div>
         <div className="field">
           <div className="field-label">og status</div>
-          <div className="field-value">{month}</div>
+          <div className="field-value">Bitcoiner since {month}</div>
         </div>
         <div className="field">
           <div className="field-label">age</div>
