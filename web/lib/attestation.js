@@ -190,7 +190,7 @@ async function verifyNostrAttestation(proof, url) {
   const rawEvent = tryParseRawEvent(url);
   if (rawEvent) {
     validateNostrEvent(rawEvent, proof);
-    return true;
+    return JSON.stringify(rawEvent);
   }
 
   // Otherwise parse note1/nevent1 reference and fetch from relays
@@ -218,7 +218,7 @@ async function verifyNostrAttestation(proof, url) {
   const event = await fetchNostrEvent(eventIdHex, relays);
   validateNostrEvent(event, proof);
 
-  return true;
+  return JSON.stringify(event);
 }
 
 // --- Dispatcher ---
@@ -226,9 +226,10 @@ async function verifyNostrAttestation(proof, url) {
 async function verifyAttestation(proof, url) {
   const identityType = getIdentityType(proof.identity);
   if (identityType === "x") {
-    return verifyXAttestation(proof, url);
+    await verifyXAttestation(proof, url);
+    return url;
   } else if (identityType === "nostr") {
-    return verifyNostrAttestation(proof, url);
+    return await verifyNostrAttestation(proof, url);
   } else {
     throw new Error("Unsupported identity type");
   }

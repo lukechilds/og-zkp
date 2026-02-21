@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { bech32 } from 'bech32';
 
 function CopyButton({ text }) {
   const [label, setLabel] = useState('copy');
@@ -53,8 +54,29 @@ export default function ProofClient({ proof }) {
   );
 }
 
+function nostrNjumpUrl(url) {
+  const neventMatch = url.match(/(nevent1[a-z0-9]+)/);
+  if (neventMatch) return `https://njump.me/${neventMatch[1]}`;
+
+  const noteMatch = url.match(/(note1[a-z0-9]+)/);
+  if (noteMatch) return `https://njump.me/${noteMatch[1]}`;
+
+  try {
+    const event = JSON.parse(url);
+    if (event.id) {
+      const bytes = event.id.match(/.{2}/g).map(b => parseInt(b, 16));
+      const words = bech32.toWords(new Uint8Array(bytes));
+      const note = bech32.encode('note', words, 1000);
+      return `https://njump.me/${note}`;
+    }
+  } catch {}
+
+  return null;
+}
+
 function AttestationDisplay({ url }) {
   const isXAttestation = url.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/);
+  const njumpUrl = !isXAttestation ? nostrNjumpUrl(url) : null;
 
   return (
     <div className="section">
@@ -64,9 +86,17 @@ function AttestationDisplay({ url }) {
           <a href={url} target="_blank" rel="noopener">{url}</a>
         </div>
       ) : (
-        <div className="code-block">
-          <pre>{url}</pre>
-        </div>
+        <>
+          <div className="code-block">
+            <pre>{url}</pre>
+            <CopyButton text={url} />
+          </div>
+          {njumpUrl && (
+            <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
+              <a href={njumpUrl} target="_blank" rel="noopener">{njumpUrl}</a>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

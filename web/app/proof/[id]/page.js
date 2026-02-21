@@ -70,7 +70,10 @@ export default async function ProofPage({ params }) {
         <div className="field">
           <div className="field-label">identity</div>
           <div className="field-value">
-            {proof.identity_type === 'x' ? proof.identity.replace(/^x\.com\//, '@') : proof.identity}
+            {proof.identity_type === 'x'
+              ? <a href={`https://${proof.identity}`} target="_blank" rel="noopener">{proof.identity.replace(/^x\.com\//, '@')}</a>
+              : <a href={`https://njump.me/${proof.identity}`} target="_blank" rel="noopener">{proof.identity}</a>
+            }
           </div>
           {proof.identity_type === 'nostr' && (
             <div className="field-sub">

@@ -25,15 +25,16 @@ export async function POST(request) {
     return Response.json({ verified: true, message: 'Already verified' });
   }
 
+  let storedUrl;
   try {
-    await verifyAttestation(proof, url);
+    storedUrl = await verifyAttestation(proof, url);
   } catch (e) {
     return Response.json({ error: e.message }, { status: 400 });
   }
 
   await db.execute({
     sql: "UPDATE proofs SET status = 'verified', attestation_url = ?, verified_at = ? WHERE proof_id = ?",
-    args: [url, Math.floor(Date.now() / 1000), proof_id],
+    args: [storedUrl, Math.floor(Date.now() / 1000), proof_id],
   });
 
   return Response.json({ verified: true });
