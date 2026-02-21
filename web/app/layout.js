@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <div className="site">
           <header>
             <div>
-              <h1>og-zkp</h1>
+              <h1><a href="/">og-zkp</a></h1>
               <p className="tagline">Prove your Bitcoin OG status in zero-knowledge</p>
             </div>
             <Nav />
