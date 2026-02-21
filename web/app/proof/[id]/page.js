@@ -78,10 +78,6 @@ export default async function ProofPage({ params }) {
             {isVerified ? '✓ verified' : 'pending attestation'}
           </div>
         </div>
-        <div className="field">
-          <div className="field-label">proof id</div>
-          <div className="field-value field-muted">{proof.proof_id}</div>
-        </div>
       </div>
 
       <ProofClient proof={{
