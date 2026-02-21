@@ -111,6 +111,8 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
 
 .leaderboard .crown-cell {
   width: 1rem;
+  min-width: 1rem;
+  max-width: 1rem;
   padding-left: 0;
   padding-right: 0.75rem;
   text-align: center;
@@ -118,6 +120,8 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
 
 .leaderboard .crown {
   vertical-align: middle;
+  position: relative;
+  left: -0.75rem;
 }
 
 .leaderboard .identity { width: 27rem; }
@@ -163,6 +167,19 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   padding: 3rem 0;
   text-align: center;
 }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+}
+
+.page-info { color: var(--text-muted); }
+.page-link { color: var(--text-dim); }
+.page-link.disabled { color: var(--text-faint); cursor: default; }
 
 /* Forms */
 label {

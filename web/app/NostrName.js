@@ -24,7 +24,8 @@ export default function NostrName({ npub, short: showShort = true }) {
     if (!npub.startsWith('npub1') || cache.has(npub)) return;
 
     let resolved = false;
-    const hex = npubToHex(npub);
+    let hex;
+    try { hex = npubToHex(npub); } catch { return; }
     const subId = Math.random().toString(36).slice(2, 10);
     const sockets = [];
 
