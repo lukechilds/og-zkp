@@ -190,6 +190,7 @@ async function verifyNostrAttestation(proof, url) {
   const rawEvent = tryParseRawEvent(url);
   if (rawEvent) {
     validateNostrEvent(rawEvent, proof);
+    publishToRelays(rawEvent, DEFAULT_RELAYS);
     return JSON.stringify(rawEvent);
   }
 
@@ -208,18 +209,33 @@ async function verifyNostrAttestation(proof, url) {
     eventIdHex = decodeNote(noteMatch[0]).toString("hex");
   }
 
-  const defaultRelays = [
-    "wss://relay.damus.io",
-    "wss://nos.lol",
-    "wss://relay.nostr.band",
-  ];
-  const relays = [...new Set([...hintRelays, ...defaultRelays])];
+  const relays = [...new Set([...hintRelays, ...DEFAULT_RELAYS])];
 
   const event = await fetchNostrEvent(eventIdHex, relays);
   validateNostrEvent(event, proof);
+  publishToRelays(event, DEFAULT_RELAYS);
 
   return JSON.stringify(event);
 }
+
+function publishToRelays(event, relays) {
+  for (const relay of relays) {
+    try {
+      const ws = new WebSocket(relay);
+      ws.on("open", () => {
+        ws.send(JSON.stringify(["EVENT", event]));
+        setTimeout(() => ws.close(), 3000);
+      });
+      ws.on("error", () => {});
+    } catch {}
+  }
+}
+
+const DEFAULT_RELAYS = [
+  "wss://relay.damus.io",
+  "wss://nos.lol",
+  "wss://relay.nostr.band",
+];
 
 // --- Dispatcher ---
 
