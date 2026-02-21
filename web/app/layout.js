@@ -1,6 +1,28 @@
 import { JetBrains_Mono } from 'next/font/google';
+import { createHash } from 'crypto';
 import './globals.css';
 import Nav from './Nav';
+
+const NUM_LINES = 5;
+const MIDDLE = 2;
+
+function sha256(input) {
+  return createHash('sha256').update(input).digest('hex');
+}
+
+function generateHashes() {
+  const lines = [];
+  let hash = sha256('luke');
+  for (let i = 0; i < NUM_LINES; i++) {
+    lines.push(hash);
+    hash = sha256(hash);
+  }
+  return lines;
+}
+
+const hashes = generateHashes();
+const title = ' og-zkp ';
+const start = Math.floor((64 - title.length) / 2);
 
 const mono = JetBrains_Mono({ subsets: ['latin'] });
 
@@ -23,10 +45,21 @@ export default function RootLayout({ children }) {
       <body>
         <div className="site">
           <header>
-            <div>
-              <h1><a href="/">og-zkp</a></h1>
-              <p className="tagline">Prove your Bitcoin OG status in zero-knowledge</p>
-            </div>
+            <a href="/" className="header-link" aria-label="og-zkp home">
+              <div className="hash-header">
+                {hashes.map((hash, i) => (
+                  i === MIDDLE ? (
+                    <div key={hash}>
+                      <span className="hash-dim">{hash.slice(0, start)}</span>
+                      <span className="hash-text">{title}</span>
+                      <span className="hash-dim">{hash.slice(start + title.length)}</span>
+                    </div>
+                  ) : (
+                    <div key={hash} className="hash-dim">{hash}</div>
+                  )
+                ))}
+              </div>
+            </a>
             <Nav />
           </header>
           <main>{children}</main>
