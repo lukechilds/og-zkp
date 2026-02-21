@@ -8,7 +8,7 @@ const getProof = cache(async (id) => {
   const db = getDb();
   await migrate();
   const result = await db.execute({
-    sql: "SELECT proof_id, proof, identity, identity_type, block_month, block_inclusion_root, attestation_url, status, created_at, verified_at FROM proofs WHERE proof_id = ?",
+    sql: "SELECT proof_id, proof, identity, identity_type, block_month, block_inclusion_root, attestation_url, status, created_at, verified_at, nip05 FROM proofs WHERE proof_id = ?",
     args: [id],
   });
   return result.rows[0] || null;
@@ -43,10 +43,11 @@ export async function generateMetadata({ params }) {
 
   const month = formatMonth(proof.block_month);
   const status = proof.status === 'verified' ? 'Verified' : 'Pending';
+  const displayName = proof.nip05 || proof.identity;
   return {
-    title: `${proof.identity} - og-zkp`,
+    title: `${displayName} - og-zkp`,
     openGraph: {
-      title: `${proof.identity} - og-zkp`,
+      title: `${displayName} - og-zkp`,
       description: `${status} Bitcoin OG since ${month}`,
       url: `https://og-zkp.com/proof/${proof.proof_id}`,
     },
@@ -77,7 +78,7 @@ export default async function ProofPage({ params }) {
           </div>
           {proof.identity_type === 'nostr' && (
             <div className="field-sub">
-              <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} short={false} />
+              <span className="field-sub-label">nip-05</span> {proof.nip05 || <NostrName npub={proof.identity} short={false} />}
             </div>
           )}
         </div>

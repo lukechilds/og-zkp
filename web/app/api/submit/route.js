@@ -2,6 +2,7 @@ const { getDb, migrate } = require('../../../lib/db');
 const { verify } = require('../../../lib/verify');
 const { proofId } = require('../../../lib/crypto');
 const { getIdentityType } = require('../../../lib/attestation');
+const { resolveNip05 } = require('../../../lib/nip05');
 
 export async function POST(request) {
   const body = await request.json();
@@ -50,6 +51,17 @@ export async function POST(request) {
       Math.floor(Date.now() / 1000),
     ],
   });
+
+  if (identityType === 'nostr') {
+    resolveNip05(result.identity).then((nip05) => {
+      if (nip05) {
+        db.execute({
+          sql: 'UPDATE proofs SET nip05 = ? WHERE proof_id = ?',
+          args: [nip05, id],
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }
 
   return Response.json({
     proof_id: id,

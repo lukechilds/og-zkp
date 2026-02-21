@@ -47,7 +47,7 @@ export default async function Home({ searchParams }) {
   }
 
   const result = await db.execute({
-    sql: "SELECT proof_id, identity, identity_type, block_month FROM proofs WHERE status = 'verified' ORDER BY CAST(block_month AS INTEGER) ASC LIMIT ? OFFSET ?",
+    sql: "SELECT proof_id, identity, identity_type, block_month, nip05 FROM proofs WHERE status = 'verified' ORDER BY CAST(block_month AS INTEGER) ASC LIMIT ? OFFSET ?",
     args: [PER_PAGE, offset],
   });
   const proofs = result.rows;
@@ -82,7 +82,9 @@ export default async function Home({ searchParams }) {
                 <td className="identity">
                   <Link href={`/proof/${p.proof_id}`}>
                     {p.identity_type === 'nostr'
-                      ? <NostrName npub={p.identity} />
+                      ? (p.nip05
+                        ? <>{p.nip05} <span className="npub-short">({p.identity.slice(0, 8)}...{p.identity.slice(-8)})</span></>
+                        : <NostrName npub={p.identity} />)
                       : p.identity.replace(/^x\.com\//, '@')}
                   </Link>
                   <svg className="verified-badge" style={currentPage === 1 ? { animationDelay: `${0.3 + i * 0.12}s` } : { opacity: 1, animation: 'none' }} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

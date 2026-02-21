@@ -28,6 +28,9 @@ async function migrate() {
       verified_at INTEGER
     )
   `);
+  try {
+    await db.execute(`ALTER TABLE proofs ADD COLUMN nip05 TEXT`);
+  } catch {}
 }
 
 module.exports = { getDb, migrate };
