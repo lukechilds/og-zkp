@@ -29,11 +29,12 @@ export default function Nav() {
         <Modal title="how it works" onClose={() => setOpen(null)}>
           <div className="instructions">
             <ol>
-              <li>Generate a zero-knowledge proof that you controlled Bitcoin before a given block using the <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">og-zkp CLI</a></li>
+              <li>Generate a zero-knowledge proof that you owned Bitcoin on a given date using the <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">og-zkp CLI</a></li>
               <li>Submit your proof to the leaderboard</li>
               <li>Verify your identity by posting an attestation on X or Nostr</li>
               <li>Get listed as a verified Bitcoin OG</li>
             </ol>
+            <p>Your address and exact date are kept private, only the calendar month and identity are revealed.</p>
           </div>
         </Modal>
       )}

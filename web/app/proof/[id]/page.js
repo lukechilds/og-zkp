@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { getDb, migrate } from '../../../lib/db';
-import { formatMonth, formatAge } from '../../../lib/date';
+import { formatMonth, formatAge, getRank } from '../../../lib/date';
 import ProofClient from './ProofClient';
 import NostrName from '../../NostrName';
+import RankBadge from '../../RankBadge';
 
 const getProof = cache(async (id) => {
   const db = getDb();
@@ -21,13 +22,14 @@ export async function generateMetadata({ params }) {
   if (!proof) return { title: 'proof not found - og-zkp' };
 
   const month = formatMonth(proof.block_month);
+  const rank = getRank(proof.block_month);
   const status = proof.status === 'verified' ? 'Verified' : 'Pending';
   const displayName = proof.nip05 || proof.identity;
   return {
     title: `${displayName} - og-zkp`,
     openGraph: {
       title: `${displayName} - og-zkp`,
-      description: `${status} Bitcoin OG since ${month}`,
+      description: `${status} — ${rank} — Bitcoiner since ${month}`,
       url: `https://og-zkp.com/proof/${proof.proof_id}`,
     },
     twitter: {
@@ -44,12 +46,16 @@ export default async function ProofPage({ params }) {
   if (!proof) notFound();
 
   const month = formatMonth(proof.block_month);
+  const rank = getRank(proof.block_month);
   const age = formatAge(proof.block_month);
   const isVerified = proof.status === 'verified';
 
   return (
     <>
       <div className="proof-card">
+        <div className="field">
+          <div className="field-value"><RankBadge rank={rank} /></div>
+        </div>
         <div className="field">
           <div className="field-label">identity</div>
           <div className="field-value">

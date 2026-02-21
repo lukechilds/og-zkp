@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { getDb, migrate } from '../../../lib/db';
-import { formatMonth } from '../../../lib/date';
+import { formatMonth, getRank } from '../../../lib/date';
 
 export const alt = 'og-zkp proof';
 export const size = { width: 1200, height: 630 };
@@ -55,15 +55,26 @@ export default async function Image({ params }) {
     displayName = proof.identity.replace(/^x\.com\//, '@');
   } else if (proof.nip05) {
     const nip05 = proof.nip05.startsWith('_@') ? proof.nip05.slice(2) : proof.nip05;
-    const shortNpub = `${proof.identity.slice(0, 8)}...${proof.identity.slice(-8)}`;
+    const shortNpub = `npub...${proof.identity.slice(-6)}`;
     displayName = `${nip05} (${shortNpub})`;
   } else {
-    displayName = `${proof.identity.slice(0, 8)}...${proof.identity.slice(-8)}`;
+    displayName = `npub...${proof.identity.slice(-6)}`;
   }
   const isVerified = proof.status === 'verified';
   const status = isVerified ? 'Verified' : 'Pending';
   const statusColor = isVerified ? '#22c55e' : '#f59e0b';
   const month = formatMonth(proof.block_month);
+  const rank = getRank(proof.block_month);
+  const rankColors = {
+    Legend: '#e3b341',
+    Cypherpunk: '#34d399',
+    Pioneer: '#22d3ee',
+    Veteran: '#60a5fa',
+    Hodler: '#a78bfa',
+    Stacker: '#d29922',
+    Pleb: '#818a96',
+  };
+  const rankColor = rankColors[rank] || '#818a96';
 
   return new ImageResponse(
     (
@@ -100,7 +111,8 @@ export default async function Image({ params }) {
         <div style={{ display: 'flex', color: statusColor, fontSize: 28, marginBottom: 20 }}>
           {status}
         </div>
-        <div style={{ display: 'flex', color: '#999999', fontSize: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, color: '#999999', fontSize: 28 }}>
+          <span style={{ color: rankColor, fontSize: 24, border: `1px solid ${rankColor}40`, borderRadius: 6, padding: '4px 14px', background: `${rankColor}18`, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{rank}</span>
           {`Bitcoin OG since ${month}`}
         </div>
       </div>

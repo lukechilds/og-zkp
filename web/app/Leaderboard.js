@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getDb, migrate } from '../lib/db';
-import { formatMonth, formatAge } from '../lib/date';
+import { formatMonth, formatAge, getRank } from '../lib/date';
 import NostrName from './NostrName';
+import RankBadge from './RankBadge';
 
 const PER_PAGE = 15;
 
@@ -48,6 +49,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
               <th className="rank">#</th>
               <th className="crown-cell"></th>
               <th>identity</th>
+              <th>rank</th>
               <th>og status</th>
               <th>age</th>
             </tr>
@@ -78,6 +80,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                   </td>
+                  <td className="tier"><RankBadge rank={getRank(p.block_month)} /></td>
                   <td className="month">{formatMonth(p.block_month)}</td>
                   <td className="age">{formatAge(p.block_month)}</td>
                 </tr>

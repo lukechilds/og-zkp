@@ -63,9 +63,9 @@ export default function NostrName({ npub, nip05, short: showShort = true }) {
 
   if (!name) {
     if (!showShort) return npub;
-    return `${npub.slice(0, 8)}...${npub.slice(-8)}`;
+    return `npub...${npub.slice(-6)}`;
   }
   if (!showShort) return name;
-  const truncated = `${npub.slice(0, 8)}...${npub.slice(-8)}`;
+  const truncated = `npub...${npub.slice(-6)}`;
   return <>{name} <span className="npub-short">({truncated})</span></>;
 }
