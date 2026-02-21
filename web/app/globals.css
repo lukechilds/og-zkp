@@ -194,6 +194,7 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
 .leaderboard .identity a:hover { text-decoration: underline; text-decoration-color: var(--text-dim); }
 
 .npub-short { color: var(--text-muted); }
+.nip05-domain { color: var(--text-faint); }
 .identity-type { color: var(--text-faint); font-size: 0.65rem; margin-left: 0.5rem; }
 
 .verified-badge {

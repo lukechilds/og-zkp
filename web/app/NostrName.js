@@ -66,5 +66,7 @@ export default function NostrName({ npub, nip05, short: showShort = true }) {
     return `npub...${npub.slice(-6)}`;
   }
   if (!showShort) return name;
-  return name;
+  const atIndex = name.indexOf('@');
+  if (atIndex === -1) return name;
+  return <>{name.slice(0, atIndex)}<span className="nip05-domain">@{name.slice(atIndex + 1)}</span></>;
 }
