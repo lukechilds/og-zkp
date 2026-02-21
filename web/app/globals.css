@@ -126,6 +126,10 @@ footer a:hover { color: var(--text); }
 footer .sep { color: var(--text-faint); }
 footer .credit { margin-left: auto; color: var(--text-muted); }
 
+/* Search */
+.search-form { margin-bottom: 1.5rem; }
+.search-form input { font-size: 0.75rem; }
+
 /* Leaderboard */
 .leaderboard {
   width: 100%;

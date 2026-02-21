@@ -2,92 +2,109 @@ import Link from 'next/link';
 import { getDb, migrate } from '../lib/db';
 import { formatMonth, formatAge } from '../lib/date';
 import NostrName from './NostrName';
+import SearchInput from './SearchInput';
 
 export const dynamic = 'force-dynamic';
 
 const PER_PAGE = 15;
 
 export default async function Home({ searchParams }) {
-  const { page } = await searchParams;
+  const { page, q } = await searchParams;
+  const query = (q || '').trim();
   const currentPage = Math.max(1, parseInt(page, 10) || 1);
   const offset = (currentPage - 1) * PER_PAGE;
 
   const db = getDb();
   await migrate();
 
-  const countResult = await db.execute(
-    "SELECT COUNT(*) as total FROM proofs WHERE status = 'verified'"
-  );
+  const whereArgs = query ? [`%${query}%`, `%${query}%`] : [];
+
+  const countResult = await db.execute({
+    sql: query
+      ? "SELECT COUNT(*) as total FROM proofs WHERE status = 'verified' AND (identity LIKE ? OR nip05 LIKE ?)"
+      : "SELECT COUNT(*) as total FROM proofs WHERE status = 'verified'",
+    args: whereArgs,
+  });
   const total = Number(countResult.rows[0].total);
   const totalPages = Math.ceil(total / PER_PAGE);
 
-  if (total === 0) {
-    return <p className="empty">no verified proofs yet</p>;
-  }
-
   const result = await db.execute({
-    sql: "SELECT proof_id, identity, identity_type, block_month, nip05 FROM proofs WHERE status = 'verified' ORDER BY CAST(block_month AS INTEGER) ASC LIMIT ? OFFSET ?",
-    args: [PER_PAGE, offset],
+    sql: `SELECT * FROM (
+      SELECT proof_id, identity, identity_type, block_month, nip05,
+        ROW_NUMBER() OVER (ORDER BY CAST(block_month AS INTEGER) ASC) as rank
+      FROM proofs WHERE status = 'verified'
+    ) WHERE ${query ? '(identity LIKE ? OR nip05 LIKE ?)' : '1=1'} LIMIT ? OFFSET ?`,
+    args: [...whereArgs, PER_PAGE, offset],
   });
   const proofs = result.rows;
 
+  const pageHref = (p) => query ? `/?q=${encodeURIComponent(query)}&page=${p}` : `/?page=${p}`;
+
   return (
     <>
-      <table className="leaderboard">
-        <thead>
-          <tr>
-            <th className="rank">#</th>
-            <th className="crown-cell"></th>
-            <th>identity</th>
-            <th>og status</th>
-            <th>age</th>
-            <th className="type">type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {proofs.map((p, i) => {
-            const rank = offset + i + 1;
-            return (
-              <tr key={p.proof_id}>
-                <td className="rank">{String(rank).padStart(2, '0')}</td>
-                <td className="crown-cell">
-                  {rank === 1 && (
-                    <svg className="crown" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
-                      <path d="M5 21h14" />
+      <div className="search-form">
+        <SearchInput />
+      </div>
+
+      {total === 0 ? (
+        <p className="empty">{query ? 'no results' : 'no verified proofs yet'}</p>
+      ) : (
+        <table className="leaderboard">
+          <thead>
+            <tr>
+              <th className="rank">#</th>
+              <th className="crown-cell"></th>
+              <th>identity</th>
+              <th>og status</th>
+              <th>age</th>
+              <th className="type">type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {proofs.map((p, i) => {
+              const rank = Number(p.rank);
+              return (
+                <tr key={p.proof_id}>
+                  <td className="rank">{String(rank).padStart(2, '0')}</td>
+                  <td className="crown-cell">
+                    {rank === 1 && (
+                      <svg className="crown" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+                        <path d="M5 21h14" />
+                      </svg>
+                    )}
+                  </td>
+                  <td className="identity">
+                    <Link href={`/proof/${p.proof_id}`}>
+                      {p.identity_type === 'nostr'
+                        ? <NostrName npub={p.identity} nip05={p.nip05} />
+                        : p.identity.replace(/^x\.com\//, '@')}
+                    </Link>
+                    <svg className="verified-badge" style={!query && currentPage === 1 ? { animationDelay: `${0.3 + i * 0.12}s` } : { opacity: 1, animation: 'none' }} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
-                  )}
-                </td>
-                <td className="identity">
-                  <Link href={`/proof/${p.proof_id}`}>
-                    {p.identity_type === 'nostr'
-                      ? <NostrName npub={p.identity} nip05={p.nip05} />
-                      : p.identity.replace(/^x\.com\//, '@')}
-                  </Link>
-                  <svg className="verified-badge" style={currentPage === 1 ? { animationDelay: `${0.3 + i * 0.12}s` } : { opacity: 1, animation: 'none' }} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                  </svg>
-                </td>
-                <td className="month">{formatMonth(p.block_month)}</td>
-                <td className="age">{formatAge(p.block_month)}</td>
-                <td className="type">{p.identity_type}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  </td>
+                  <td className="month">{formatMonth(p.block_month)}</td>
+                  <td className="age">{formatAge(p.block_month)}</td>
+                  <td className="type">{p.identity_type}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
 
       {totalPages > 1 && (
         <div className="pagination">
           {currentPage > 1 ? (
-            <Link href={`/?page=${currentPage - 1}`} className="page-link">&larr; prev</Link>
+            <Link href={pageHref(currentPage - 1)} className="page-link">&larr; prev</Link>
           ) : (
             <span className="page-link disabled">&larr; prev</span>
           )}
           <span className="page-info">{currentPage} / {totalPages}</span>
           {currentPage < totalPages ? (
-            <Link href={`/?page=${currentPage + 1}`} className="page-link">next &rarr;</Link>
+            <Link href={pageHref(currentPage + 1)} className="page-link">next &rarr;</Link>
           ) : (
             <span className="page-link disabled">next &rarr;</span>
           )}
