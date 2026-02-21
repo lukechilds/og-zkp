@@ -63,7 +63,7 @@ export default function NostrName({ npub, nip05, short: showShort = true }) {
 
   if (!name) {
     if (!showShort) return npub;
-    return `npub...${npub.slice(-6)}`;
+    return `${npub.slice(0, 8)}...${npub.slice(-6)}`;
   }
   if (!showShort) return name;
   const atIndex = name.indexOf('@');

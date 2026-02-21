@@ -55,10 +55,10 @@ export default async function Image({ params }) {
     displayName = proof.identity.replace(/^x\.com\//, '@');
   } else if (proof.nip05) {
     const nip05 = proof.nip05.startsWith('_@') ? proof.nip05.slice(2) : proof.nip05;
-    const shortNpub = `npub...${proof.identity.slice(-6)}`;
+    const shortNpub = `${proof.identity.slice(0, 8)}...${proof.identity.slice(-6)}`;
     displayName = `${nip05} (${shortNpub})`;
   } else {
-    displayName = `npub...${proof.identity.slice(-6)}`;
+    displayName = `${proof.identity.slice(0, 8)}...${proof.identity.slice(-6)}`;
   }
   const isVerified = proof.status === 'verified';
   const status = isVerified ? 'Verified' : 'Pending';
