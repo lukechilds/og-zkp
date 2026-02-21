@@ -2,7 +2,7 @@
 
 > Prove your Bitcoin OG status in zero-knowledge
 
-og-zkp lets you prove the calendar month (e.g January 2011) you first received Bitcoin, tied to any identity you choose, without exposing your address, transaction, the specific block it was confirmed in or the exact date it was confirmed. The output is a compact cryptographic proof that anyone can verify instantly.
+og-zkp allows you to privately prove the calendar month (e.g January 2011) you first received Bitcoin, tied to any identity you choose, without exposing your address, transaction, the specific block it was confirmed in or the exact date it was confirmed. The output is a compact cryptographic proof that anyone can verify instantly.
 
 You sign a message with a Bitcoin private key. The og-zkp prover will then trace the key back to it's first received transaction, verify that transaction was included in a real Bitcoin block, attests to the calendar month that block was mined and collapses all of that into a single zero-knowledge proof.
 
