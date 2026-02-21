@@ -172,7 +172,7 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
 .leaderboard .crown {
   vertical-align: middle;
   position: relative;
-  left: -0.75rem;
+  left: -0.55rem;
 }
 
 .leaderboard .identity { width: 30rem; }
