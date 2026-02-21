@@ -69,7 +69,9 @@ export default async function ProofPage({ params }) {
       <div className="proof-card">
         <div className="field">
           <div className="field-label">identity</div>
-          <div className="field-value">{proof.identity}</div>
+          <div className="field-value">
+            {proof.identity_type === 'x' ? proof.identity.replace(/^x\.com\//, '@') : proof.identity}
+          </div>
           {proof.identity_type === 'nostr' && (
             <div className="field-sub">
               <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} short={false} />

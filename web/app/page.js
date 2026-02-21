@@ -65,7 +65,9 @@ export default async function Home() {
             </td>
             <td className="identity">
               <Link href={`/proof/${p.proof_id}`}>
-                {p.identity_type === 'nostr' ? <NostrName npub={p.identity} /> : p.identity}
+                {p.identity_type === 'nostr'
+                  ? <NostrName npub={p.identity} />
+                  : p.identity.replace(/^x\.com\//, '@')}
               </Link>
             </td>
             <td className="month">{formatMonth(p.block_month)}</td>
