@@ -1,32 +1,11 @@
 import Link from 'next/link';
 import { getDb, migrate } from '../lib/db';
+import { formatMonth, formatAge } from '../lib/date';
 import NostrName from './NostrName';
 
 export const dynamic = 'force-dynamic';
 
 const PER_PAGE = 15;
-
-function formatMonth(ts) {
-  const n = parseInt(ts, 10);
-  if (isNaN(n)) return ts;
-  const d = new Date(n * 1000);
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
-}
-
-function formatAge(ts) {
-  const n = parseInt(ts, 10);
-  if (isNaN(n)) return '';
-  const then = new Date(n * 1000);
-  const now = new Date();
-  let years = now.getUTCFullYear() - then.getUTCFullYear();
-  let months = now.getUTCMonth() - then.getUTCMonth();
-  if (months < 0) { years--; months += 12; }
-  if (years > 0 && months > 0) return `${years}y ${months}m`;
-  if (years > 0) return `${years}y`;
-  if (months > 0) return `${months}m`;
-  return '<1m';
-}
 
 export default async function Home({ searchParams }) {
   const { page } = await searchParams;
@@ -82,9 +61,7 @@ export default async function Home({ searchParams }) {
                 <td className="identity">
                   <Link href={`/proof/${p.proof_id}`}>
                     {p.identity_type === 'nostr'
-                      ? (p.nip05
-                        ? <>{p.nip05} <span className="npub-short">({p.identity.slice(0, 8)}...{p.identity.slice(-8)})</span></>
-                        : <NostrName npub={p.identity} />)
+                      ? <NostrName npub={p.identity} nip05={p.nip05} />
                       : p.identity.replace(/^x\.com\//, '@')}
                   </Link>
                   <svg className="verified-badge" style={currentPage === 1 ? { animationDelay: `${0.3 + i * 0.12}s` } : { opacity: 1, animation: 'none' }} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

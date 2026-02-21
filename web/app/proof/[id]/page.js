@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { getDb, migrate } from '../../../lib/db';
+import { formatMonth, formatAge } from '../../../lib/date';
 import ProofClient from './ProofClient';
 import NostrName from '../../NostrName';
 
@@ -13,28 +14,6 @@ const getProof = cache(async (id) => {
   });
   return result.rows[0] || null;
 });
-
-function formatMonth(ts) {
-  const n = parseInt(ts, 10);
-  if (isNaN(n)) return ts;
-  const d = new Date(n * 1000);
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
-}
-
-function formatAge(ts) {
-  const n = parseInt(ts, 10);
-  if (isNaN(n)) return '';
-  const then = new Date(n * 1000);
-  const now = new Date();
-  let years = now.getUTCFullYear() - then.getUTCFullYear();
-  let months = now.getUTCMonth() - then.getUTCMonth();
-  if (months < 0) { years--; months += 12; }
-  if (years > 0 && months > 0) return `${years}y ${months}m`;
-  if (years > 0) return `${years}y`;
-  if (months > 0) return `${months}m`;
-  return '<1m';
-}
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -78,7 +57,7 @@ export default async function ProofPage({ params }) {
           </div>
           {proof.identity_type === 'nostr' && (
             <div className="field-sub">
-              <span className="field-sub-label">nip-05</span> {proof.nip05 || <NostrName npub={proof.identity} short={false} />}
+              <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} nip05={proof.nip05} short={false} />
             </div>
           )}
         </div>

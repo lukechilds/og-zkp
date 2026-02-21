@@ -17,11 +17,11 @@ function npubToHex(npub) {
   return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export default function NostrName({ npub, short: showShort = true }) {
-  const [name, setName] = useState(cache.get(npub) || null);
+export default function NostrName({ npub, nip05, short: showShort = true }) {
+  const [name, setName] = useState(nip05 || cache.get(npub) || null);
 
   useEffect(() => {
-    if (!npub.startsWith('npub1') || cache.has(npub)) return;
+    if (nip05 || !npub.startsWith('npub1') || cache.has(npub)) return;
 
     let resolved = false;
     let hex;
