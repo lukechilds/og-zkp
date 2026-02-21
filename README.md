@@ -1,6 +1,6 @@
 # og-zkp
 
-> Prove your Bitcoin OG status in zero-knowledge!
+> Prove your Bitcoin OG status in zero-knowledge
 
 og-zkp lets you prove which calendar month you first received Bitcoin, tied to any identity you choose, without exposing your address, transaction, or the specific block it was confirmed in. The output is a compact cryptographic proof that anyone can verify instantly.
 

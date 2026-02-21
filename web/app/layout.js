@@ -6,7 +6,7 @@ const mono = JetBrains_Mono({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'og-zkp',
-  description: 'Prove your Bitcoin OG status in zero-knowledge!',
+  description: 'Prove your Bitcoin OG status in zero-knowledge',
 };
 
 export default function RootLayout({ children }) {
@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
           <header>
             <div>
               <h1>og-zkp</h1>
-              <p className="tagline">Prove your Bitcoin OG status in zero-knowledge!</p>
+              <p className="tagline">Prove your Bitcoin OG status in zero-knowledge</p>
             </div>
             <Nav />
           </header>
