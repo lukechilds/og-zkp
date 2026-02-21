@@ -15,8 +15,10 @@ export default function RootLayout({ children }) {
       <body>
         <div className="site">
           <header>
-            <h1>og-zkp</h1>
-            <p className="tagline">Prove your Bitcoin OG status in zero-knowledge!</p>
+            <div>
+              <h1>og-zkp</h1>
+              <p className="tagline">Prove your Bitcoin OG status in zero-knowledge!</p>
+            </div>
             <Nav />
           </header>
           <main>{children}</main>

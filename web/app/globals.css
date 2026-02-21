@@ -39,7 +39,12 @@ a:hover { color: var(--text); }
   padding: 3rem 1.5rem;
 }
 
-header { margin-bottom: 3rem; }
+header {
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
 
 header h1 {
   font-size: 1.2rem;
@@ -53,16 +58,58 @@ header h1 {
   margin-top: 0.3rem;
 }
 
-nav {
-  margin-top: 1.5rem;
+.header-actions {
   display: flex;
   gap: 1.5rem;
-  font-size: 0.75rem;
+  margin-top: 0.2rem;
 }
 
-nav a { color: var(--text-dim); }
-nav a:hover { color: var(--text); }
-nav a.active { color: #fff; }
+.btn-nav {
+  background: none;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  padding: 0;
+}
+.btn-nav:hover { color: var(--text); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 2rem;
+  max-width: 520px;
+  width: 90%;
+  position: relative;
+}
+
+.modal h2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  padding: 0;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
 
 footer {
   margin-top: 4rem;
@@ -205,7 +252,7 @@ textarea, input[type="text"] {
   padding: 0.65rem 0.75rem;
   font-family: inherit;
   font-size: 0.75rem;
-  border-radius: 3px;
+  border-radius: 0;
   transition: border-color 0.15s;
 }
 
@@ -314,7 +361,7 @@ button {
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 0.65rem 0.75rem;
-  border-radius: 3px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 0.7rem;
   color: var(--text-dim);
@@ -332,7 +379,7 @@ button {
   padding: 0.15rem 0.4rem;
   font-size: 0.6rem;
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: 0;
   margin: 0;
 }
 .copy-btn:hover { color: var(--text-dim); border-color: var(--text-muted); }
