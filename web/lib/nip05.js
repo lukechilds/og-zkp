@@ -13,16 +13,23 @@ function npubToHex(npub) {
   return Buffer.from(bech32.fromWords(words)).toString("hex");
 }
 
-function resolveNip05(npub, timeoutMs = 3000) {
+async function verifyNip05(nip05, hex) {
+  try {
+    const [name, domain] = nip05.includes("@") ? nip05.split("@") : ["_", nip05];
+    const res = await fetch(`https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(name)}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.names?.[name] === hex;
+  } catch {
+    return false;
+  }
+}
+
+function fetchNip05FromRelays(hex, timeoutMs = 3000) {
   return new Promise((resolve) => {
     let done = false;
-    let hex;
-    try {
-      hex = npubToHex(npub);
-    } catch {
-      return resolve(null);
-    }
-
     const sockets = [];
     const subId = Math.random().toString(36).slice(2, 10);
 
@@ -54,10 +61,7 @@ function resolveNip05(npub, timeoutMs = 3000) {
                 done = true;
                 clearTimeout(timeout);
                 sockets.forEach((s) => s.close());
-                const display = meta.nip05.startsWith("_@")
-                  ? meta.nip05.slice(2)
-                  : meta.nip05;
-                resolve(display);
+                resolve(meta.nip05);
               }
             }
           } catch {}
@@ -67,6 +71,23 @@ function resolveNip05(npub, timeoutMs = 3000) {
       } catch {}
     }
   });
+}
+
+async function resolveNip05(npub, timeoutMs = 3000) {
+  let hex;
+  try {
+    hex = npubToHex(npub);
+  } catch {
+    return null;
+  }
+
+  const nip05 = await fetchNip05FromRelays(hex, timeoutMs);
+  if (!nip05) return null;
+
+  const verified = await verifyNip05(nip05, hex);
+  if (!verified) return null;
+
+  return nip05.startsWith("_@") ? nip05.slice(2) : nip05;
 }
 
 module.exports = { resolveNip05 };
