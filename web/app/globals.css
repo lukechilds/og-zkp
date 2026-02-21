@@ -191,6 +191,9 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   margin-left: 0.4rem;
   position: relative;
   top: -1px;
+}
+
+.first-visit .verified-badge {
   opacity: 0;
   animation: verifyIn 0.4s ease forwards;
 }
