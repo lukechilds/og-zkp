@@ -62,7 +62,7 @@ export default async function ProofPage({ params }) {
                   ? <a href={`https://${proof.identity}`} target="_blank" rel="noopener">{proof.identity.replace(/^x\.com\//, '@')}</a>
                   : <a href={`https://njump.me/${proof.identity}`} target="_blank" rel="noopener">{proof.identity}</a>
                 }
-                {proof.identity_type === 'nostr' && (
+                {proof.identity_type === 'nostr' && proof.nip05 && (
                   <div className="field-sub">
                     <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} nip05={proof.nip05} short={false} />
                   </div>
