@@ -385,14 +385,8 @@ button {
 }
 .copy-btn:hover { color: var(--text-dim); border-color: var(--text-muted); }
 
-/* Proof string */
-.proof-string pre {
-  font-size: 0.6rem;
-  color: var(--text-muted);
-}
-
 /* Attestation display */
 .attestation-link {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   word-break: break-all;
 }

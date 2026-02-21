@@ -45,7 +45,7 @@ export default function ProofClient({ proof }) {
 
       <div className="section">
         <div className="section-title">proof</div>
-        <div className="code-block proof-string">
+        <div className="code-block">
           <pre>{proof.proof}</pre>
           <CopyButton text={proof.proof} />
         </div>
@@ -81,22 +81,19 @@ function AttestationDisplay({ url }) {
   return (
     <div className="section">
       <div className="section-title">attestation</div>
-      {isXAttestation ? (
-        <div className="attestation-link">
+      <div className="code-block">
+        <pre>{url}</pre>
+        <CopyButton text={url} />
+      </div>
+      {isXAttestation && (
+        <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
           <a href={url} target="_blank" rel="noopener">{url}</a>
         </div>
-      ) : (
-        <>
-          <div className="code-block">
-            <pre>{url}</pre>
-            <CopyButton text={url} />
-          </div>
-          {njumpUrl && (
-            <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
-              <a href={njumpUrl} target="_blank" rel="noopener">{njumpUrl}</a>
-            </div>
-          )}
-        </>
+      )}
+      {njumpUrl && (
+        <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
+          <a href={njumpUrl} target="_blank" rel="noopener">{njumpUrl}</a>
+        </div>
       )}
     </div>
   );
