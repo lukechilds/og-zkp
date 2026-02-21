@@ -1,18 +1,20 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useRef, useState } from 'react';
 
 export default function SearchInput() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const params = useParams();
+  const [value, setValue] = useState(params.query ? decodeURIComponent(params.query) : '');
   const timer = useRef(null);
 
   function handleChange(e) {
-    clearTimeout(timer.current);
     const val = e.target.value;
+    setValue(val);
+    clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      router.replace(val ? `/?q=${encodeURIComponent(val)}` : '/');
+      router.replace(val.trim() ? `/search/${encodeURIComponent(val.trim())}` : '/');
     }, 200);
   }
 
@@ -21,7 +23,7 @@ export default function SearchInput() {
       type="text"
       name="q"
       placeholder="search by identity"
-      defaultValue={searchParams.get('q') || ''}
+      value={value}
       onChange={handleChange}
     />
   );

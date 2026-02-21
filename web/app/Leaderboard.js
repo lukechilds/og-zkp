@@ -2,16 +2,10 @@ import Link from 'next/link';
 import { getDb, migrate } from '../lib/db';
 import { formatMonth, formatAge } from '../lib/date';
 import NostrName from './NostrName';
-import SearchInput from './SearchInput';
-
-export const dynamic = 'force-dynamic';
 
 const PER_PAGE = 15;
 
-export default async function Home({ searchParams }) {
-  const { page, q } = await searchParams;
-  const query = (q || '').trim();
-  const currentPage = Math.max(1, parseInt(page, 10) || 1);
+export default async function Leaderboard({ query = '', currentPage = 1 }) {
   const offset = (currentPage - 1) * PER_PAGE;
 
   const db = getDb();
@@ -38,14 +32,13 @@ export default async function Home({ searchParams }) {
   });
   const proofs = result.rows;
 
-  const pageHref = (p) => query ? `/?q=${encodeURIComponent(query)}&page=${p}` : `/?page=${p}`;
+  const pageHref = (p) => {
+    if (query) return p === 1 ? `/search/${encodeURIComponent(query)}` : `/search/${encodeURIComponent(query)}/${p}`;
+    return p === 1 ? '/' : `/page/${p}`;
+  };
 
   return (
     <>
-      <div className="search-form">
-        <SearchInput />
-      </div>
-
       {total === 0 ? (
         <p className="empty">{query ? 'no results' : 'no verified proofs yet'}</p>
       ) : (
