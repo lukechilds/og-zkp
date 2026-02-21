@@ -53,6 +53,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
 
   return (
     <>
+      <h2 className="leaderboard-title">leaderboard</h2>
       {total === 0 ? (
         <p className="empty">{query ? 'no results' : 'no verified proofs yet'}</p>
       ) : (
