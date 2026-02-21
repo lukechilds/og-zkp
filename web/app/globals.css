@@ -185,11 +185,19 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   left: -0.55rem;
 }
 
-.leaderboard .identity { width: 23rem; }
+.leaderboard .identity {
+  width: 23rem;
+  white-space: nowrap;
+}
 
 .leaderboard .identity a {
   color: var(--text);
   text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 18rem;
+  vertical-align: middle;
 }
 .leaderboard .identity a:hover { text-decoration: underline; text-decoration-color: var(--text-dim); }
 
