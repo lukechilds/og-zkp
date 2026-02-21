@@ -50,7 +50,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
               <th className="crown-cell"></th>
               <th>identity</th>
               <th>rank</th>
-              <th>og status</th>
+              <th>bitcoiner since</th>
               <th>age</th>
             </tr>
           </thead>

@@ -53,37 +53,42 @@ export default async function ProofPage({ params }) {
   return (
     <>
       <div className="proof-card">
-        <div className="field">
-          <div className="field-value"><RankBadge rank={rank} /></div>
-        </div>
-        <div className="field">
-          <div className="field-label">identity</div>
-          <div className="field-value">
-            {proof.identity_type === 'x'
-              ? <a href={`https://${proof.identity}`} target="_blank" rel="noopener">{proof.identity.replace(/^x\.com\//, '@')}</a>
-              : <a href={`https://njump.me/${proof.identity}`} target="_blank" rel="noopener">{proof.identity}</a>
-            }
-          </div>
-          {proof.identity_type === 'nostr' && (
-            <div className="field-sub">
-              <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} nip05={proof.nip05} short={false} />
-            </div>
-          )}
-        </div>
-        <div className="field">
-          <div className="field-label">og status</div>
-          <div className="field-value">Bitcoiner since {month}</div>
-        </div>
-        <div className="field">
-          <div className="field-label">age</div>
-          <div className="field-value">{age}</div>
-        </div>
-        <div className="field">
-          <div className="field-label">verification</div>
-          <div className={`field-value ${isVerified ? 'status-verified' : 'status-pending'}`}>
-            {isVerified ? '✓ verified' : 'pending attestation'}
-          </div>
-        </div>
+        <table className="proof-table">
+          <tbody>
+            <tr>
+              <td className="proof-label">identity</td>
+              <td className="proof-value">
+                {proof.identity_type === 'x'
+                  ? <a href={`https://${proof.identity}`} target="_blank" rel="noopener">{proof.identity.replace(/^x\.com\//, '@')}</a>
+                  : <a href={`https://njump.me/${proof.identity}`} target="_blank" rel="noopener">{proof.identity}</a>
+                }
+                {proof.identity_type === 'nostr' && (
+                  <div className="field-sub">
+                    <span className="field-sub-label">nip-05</span> <NostrName npub={proof.identity} nip05={proof.nip05} short={false} />
+                  </div>
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td className="proof-label">rank</td>
+              <td className="proof-value"><RankBadge rank={rank} /></td>
+            </tr>
+            <tr>
+              <td className="proof-label">bitcoiner since</td>
+              <td className="proof-value">{month}</td>
+            </tr>
+            <tr>
+              <td className="proof-label">age</td>
+              <td className="proof-value">{age}</td>
+            </tr>
+            <tr>
+              <td className="proof-label">verification</td>
+              <td className={`proof-value ${isVerified ? 'status-verified' : 'status-pending'}`}>
+                {isVerified ? '✓ verified' : 'pending attestation'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <ProofClient proof={{

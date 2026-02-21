@@ -185,7 +185,7 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   left: -0.55rem;
 }
 
-.leaderboard .identity { width: 24rem; }
+.leaderboard .identity { width: 23rem; }
 
 .leaderboard .identity a {
   color: var(--text);
@@ -219,8 +219,8 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
 
 .rank-badge {
   display: inline-block;
-  font-size: 0.6rem;
-  padding: 0.1rem 0.45rem;
+  font-size: 0.55rem;
+  padding: 0.05rem 0.35rem;
   border-radius: 3px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -356,6 +356,43 @@ button {
 
 /* Proof page */
 .proof-card { margin-bottom: 2rem; }
+
+.proof-row-split {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proof-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.proof-table td {
+  padding: 0.35rem 0;
+  vertical-align: top;
+}
+
+.proof-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  width: 8rem;
+  min-width: 8rem;
+  white-space: nowrap;
+  padding-right: 2.5rem;
+  vertical-align: baseline;
+}
+
+.proof-value {
+  font-size: 0.85rem;
+  color: var(--text);
+  word-break: break-all;
+  position: relative;
+  top: -0.15rem;
+}
 
 .field { margin-bottom: 1rem; }
 .field:last-child { margin-bottom: 0; }
