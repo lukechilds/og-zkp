@@ -21,10 +21,10 @@ export default function RootLayout({ children }) {
           </header>
           <main>{children}</main>
           <footer>
-            <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">source</a>
-            <span className="sep">&middot;</span>
-            <a href="https://github.com/lukechilds/og-zkp/issues" target="_blank" rel="noopener">issues</a>
-            <span className="credit"><a href="https://lu.ke" target="_blank" rel="noopener">@lukechilds</a></span>
+            <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">Source code</a>
+            <span className="sep">-</span>
+            <a href="https://github.com/lukechilds/og-zkp/issues" target="_blank" rel="noopener">Report a bug</a>
+            <span className="credit">A thing by <a href="https://lu.ke" target="_blank" rel="noopener">@lukechilds</a></span>
           </footer>
         </div>
       </body>

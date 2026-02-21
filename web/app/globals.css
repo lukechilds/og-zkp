@@ -77,7 +77,7 @@ footer {
 footer a { color: var(--text-muted); }
 footer a:hover { color: var(--text-dim); }
 footer .sep { color: var(--text-faint); }
-footer .credit { margin-left: auto; }
+footer .credit { margin-left: auto; color: var(--text-muted); }
 
 /* Leaderboard */
 .leaderboard {
