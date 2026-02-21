@@ -43,6 +43,7 @@ export default async function Home() {
       <thead>
         <tr>
           <th className="rank">#</th>
+          <th className="crown-cell"></th>
           <th>identity</th>
           <th>og status</th>
           <th>age</th>
@@ -53,6 +54,14 @@ export default async function Home() {
         {proofs.map((p, i) => (
           <tr key={p.proof_id}>
             <td className="rank">{String(i + 1).padStart(2, '0')}</td>
+            <td className="crown-cell">
+              {i === 0 && (
+                <svg className="crown" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+                  <path d="M5 21h14" />
+                </svg>
+              )}
+            </td>
             <td className="identity"><Link href={`/proof/${p.proof_id}`}>{p.identity}</Link></td>
             <td className="month">{formatMonth(p.block_month)}</td>
             <td className="age">{formatAge(p.block_month)}</td>

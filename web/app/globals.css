@@ -6,7 +6,7 @@
   --text-dim: #adb5c0;
   --text-muted: #818a96;
   --text-faint: #5a6370;
-  --green: #3fb950;
+  --green: #34d399;
   --red: #f85149;
   --amber: #d29922;
 }
@@ -104,8 +104,21 @@ footer .credit { margin-left: auto; }
 
 .leaderboard .rank {
   color: var(--text-faint);
-  width: 2.5rem;
+  width: 2rem;
   font-size: 0.7rem;
+  white-space: nowrap;
+  padding-right: 0.5rem;
+}
+
+.leaderboard .crown-cell {
+  width: 1rem;
+  padding-left: 0;
+  padding-right: 0.75rem;
+  text-align: center;
+}
+
+.leaderboard .crown {
+  vertical-align: middle;
 }
 
 .leaderboard .identity a {
