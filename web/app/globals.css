@@ -87,7 +87,7 @@ footer .credit { margin-left: auto; }
 
 .leaderboard th {
   text-align: left;
-  padding: 0 0 0.6rem;
+  padding: 0 1.5rem 0.6rem 0;
   font-size: 0.65rem;
   font-weight: 400;
   color: var(--text-muted);
@@ -97,7 +97,7 @@ footer .credit { margin-left: auto; }
 }
 
 .leaderboard td {
-  padding: 0.5rem 0;
+  padding: 0.5rem 1.5rem 0.5rem 0;
   font-size: 0.8rem;
   border-bottom: 1px solid var(--border);
 }
