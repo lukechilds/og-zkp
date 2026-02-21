@@ -2,7 +2,7 @@ export function formatMonth(ts) {
   const n = parseInt(ts, 10);
   if (isNaN(n)) return ts;
   const d = new Date(n * 1000);
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   return months[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
 }
 
