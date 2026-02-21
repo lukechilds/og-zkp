@@ -66,12 +66,14 @@ export default async function Image({ params }) {
   const month = formatMonth(proof.block_month);
   const rank = getRank(proof.block_month);
   const rankColors = {
-    Legend: '#e3b341',
-    Cypherpunk: '#34d399',
-    Pioneer: '#22d3ee',
-    Veteran: '#60a5fa',
-    Hodler: '#a78bfa',
-    Stacker: '#d29922',
+    OG: '#f5c542',
+    Legend: '#cf6262',
+    Elder: '#34d399',
+    Cypherpunk: '#22d3ee',
+    Pioneer: '#60a5fa',
+    Veteran: '#a78bfa',
+    Hodler: '#e08a5e',
+    Stacker: '#b5738a',
     Pleb: '#818a96',
   };
   const rankColor = rankColors[rank] || '#818a96';

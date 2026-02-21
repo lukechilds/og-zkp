@@ -3,12 +3,14 @@
 import { useState } from 'react';
 
 const RANKS = [
-  { name: 'Legend', years: '2009', color: '#e3b341' },
-  { name: 'Cypherpunk', years: '2010–2011', color: '#34d399' },
-  { name: 'Pioneer', years: '2012–2013', color: '#22d3ee' },
-  { name: 'Veteran', years: '2014–2015', color: '#60a5fa' },
-  { name: 'Hodler', years: '2016–2017', color: '#a78bfa' },
-  { name: 'Stacker', years: '2018–2019', color: '#d29922' },
+  { name: 'OG', years: '2009', color: '#f5c542' },
+  { name: 'Legend', years: '2010', color: '#cf6262' },
+  { name: 'Elder', years: '2011', color: '#34d399' },
+  { name: 'Cypherpunk', years: '2012', color: '#22d3ee' },
+  { name: 'Pioneer', years: '2013', color: '#60a5fa' },
+  { name: 'Veteran', years: '2014–2015', color: '#a78bfa' },
+  { name: 'Hodler', years: '2016–2017', color: '#e08a5e' },
+  { name: 'Stacker', years: '2018–2019', color: '#b5738a' },
   { name: 'Pleb', years: '2020+', color: '#818a96' },
 ];
 

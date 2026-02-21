@@ -10,8 +10,10 @@ export function getRank(ts) {
   const n = parseInt(ts, 10);
   if (isNaN(n)) return '';
   const year = new Date(n * 1000).getUTCFullYear();
-  if (year <= 2009) return 'Legend';
-  if (year <= 2011) return 'Cypherpunk';
+  if (year <= 2009) return 'OG';
+  if (year <= 2010) return 'Legend';
+  if (year <= 2011) return 'Elder';
+  if (year <= 2012) return 'Cypherpunk';
   if (year <= 2013) return 'Pioneer';
   if (year <= 2015) return 'Veteran';
   if (year <= 2017) return 'Hodler';

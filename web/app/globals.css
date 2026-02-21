@@ -266,12 +266,14 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   background: #ffffff08;
 }
 
-.rank-legend    { color: #e3b341; border-color: #e3b34133; background: #e3b34112; }
-.rank-cypherpunk { color: #34d399; border-color: #34d39933; background: #34d39912; }
-.rank-pioneer   { color: #22d3ee; border-color: #22d3ee33; background: #22d3ee12; }
-.rank-veteran   { color: #60a5fa; border-color: #60a5fa33; background: #60a5fa12; }
-.rank-hodler    { color: #a78bfa; border-color: #a78bfa33; background: #a78bfa12; }
-.rank-stacker   { color: #d29922; border-color: #d2992233; background: #d2992212; }
+.rank-og        { color: #f5c542; border-color: #f5c54233; background: #f5c54212; }
+.rank-legend    { color: #cf6262; border-color: #cf626233; background: #cf626212; }
+.rank-elder     { color: #34d399; border-color: #34d39933; background: #34d39912; }
+.rank-cypherpunk { color: #22d3ee; border-color: #22d3ee33; background: #22d3ee12; }
+.rank-pioneer   { color: #60a5fa; border-color: #60a5fa33; background: #60a5fa12; }
+.rank-veteran   { color: #a78bfa; border-color: #a78bfa33; background: #a78bfa12; }
+.rank-hodler    { color: #e08a5e; border-color: #e08a5e33; background: #e08a5e12; }
+.rank-stacker   { color: #b5738a; border-color: #b5738a33; background: #b5738a12; }
 .rank-pleb      { color: var(--text-muted); border-color: #818a9633; background: #818a9612; }
 
 .leaderboard .month { color: var(--text-dim); white-space: nowrap; }
