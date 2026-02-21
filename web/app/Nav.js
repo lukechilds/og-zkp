@@ -41,7 +41,7 @@ export default function Nav() {
 
       {open === 'submit' && (
         <Modal title="submit proof" onClose={() => setOpen(null)}>
-          <SubmitForm />
+          <SubmitForm onSuccess={() => setOpen(null)} />
         </Modal>
       )}
     </>

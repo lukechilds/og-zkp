@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SubmitForm() {
+export default function SubmitForm({ onSuccess }) {
   const router = useRouter();
   const [proof, setProof] = useState('');
   const [error, setError] = useState('');
@@ -31,6 +31,7 @@ export default function SubmitForm() {
       if (!res.ok) {
         throw new Error(data.error || 'submission failed');
       }
+      if (onSuccess) onSuccess();
       router.push('/proof/' + data.proof_id);
     } catch (err) {
       setError(err.message);
