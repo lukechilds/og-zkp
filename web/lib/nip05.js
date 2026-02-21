@@ -1,5 +1,8 @@
 const { bech32 } = require("bech32");
+const { SimplePool, useWebSocketImplementation } = require("nostr-tools/pool");
 const WebSocket = require("ws");
+
+useWebSocketImplementation(WebSocket);
 
 const RELAYS = [
   "wss://relay.damus.io",
@@ -27,53 +30,7 @@ async function verifyNip05(nip05, hex) {
   }
 }
 
-function fetchNip05FromRelays(hex, timeoutMs = 3000) {
-  return new Promise((resolve) => {
-    let done = false;
-    const sockets = [];
-    const subId = Math.random().toString(36).slice(2, 10);
-
-    const timeout = setTimeout(() => {
-      if (!done) {
-        done = true;
-        sockets.forEach((ws) => ws.close());
-        resolve(null);
-      }
-    }, timeoutMs);
-
-    for (const relay of RELAYS) {
-      try {
-        const ws = new WebSocket(relay);
-        sockets.push(ws);
-
-        ws.on("open", () => {
-          ws.send(
-            JSON.stringify(["REQ", subId, { kinds: [0], authors: [hex], limit: 1 }])
-          );
-        });
-
-        ws.on("message", (data) => {
-          try {
-            const msg = JSON.parse(data.toString());
-            if (msg[0] === "EVENT" && msg[2]?.content && !done) {
-              const meta = JSON.parse(msg[2].content);
-              if (meta.nip05) {
-                done = true;
-                clearTimeout(timeout);
-                sockets.forEach((s) => s.close());
-                resolve(meta.nip05);
-              }
-            }
-          } catch {}
-        });
-
-        ws.on("error", () => {});
-      } catch {}
-    }
-  });
-}
-
-async function resolveNip05(npub, timeoutMs = 3000) {
+async function resolveNip05(npub) {
   let hex;
   try {
     hex = npubToHex(npub);
@@ -81,13 +38,61 @@ async function resolveNip05(npub, timeoutMs = 3000) {
     return null;
   }
 
-  const nip05 = await fetchNip05FromRelays(hex, timeoutMs);
-  if (!nip05) return null;
+  const pool = new SimplePool();
+  try {
+    const event = await pool.get(RELAYS, { kinds: [0], authors: [hex], limit: 1 });
+    if (!event?.content) return null;
 
-  const verified = await verifyNip05(nip05, hex);
-  if (!verified) return null;
+    const meta = JSON.parse(event.content);
+    if (!meta.nip05) return null;
 
-  return nip05.startsWith("_@") ? nip05.slice(2) : nip05;
+    const verified = await verifyNip05(meta.nip05, hex);
+    if (!verified) return null;
+
+    return meta.nip05.startsWith("_@") ? meta.nip05.slice(2) : meta.nip05;
+  } catch {
+    return null;
+  } finally {
+    pool.close(RELAYS);
+  }
 }
 
-module.exports = { resolveNip05 };
+async function getAllNip05s(npubs) {
+  const entries = [];
+  for (const npub of npubs) {
+    try {
+      entries.push({ npub, hex: npubToHex(npub) });
+    } catch {}
+  }
+  if (entries.length === 0) return new Map();
+
+  const pool = new SimplePool();
+  const results = new Map();
+
+  try {
+    const events = await pool.querySync(
+      RELAYS,
+      { kinds: [0], authors: entries.map((e) => e.hex) }
+    );
+
+    const hexToNpub = new Map(entries.map((e) => [e.hex, e.npub]));
+
+    for (const event of events) {
+      const npub = hexToNpub.get(event.pubkey);
+      if (!npub || results.has(npub)) continue;
+      try {
+        const meta = JSON.parse(event.content);
+        if (meta.nip05) {
+          const display = meta.nip05.startsWith("_@") ? meta.nip05.slice(2) : meta.nip05;
+          results.set(npub, { nip05: display, raw: meta.nip05, hex: event.pubkey });
+        }
+      } catch {}
+    }
+  } finally {
+    pool.close(RELAYS);
+  }
+
+  return results;
+}
+
+module.exports = { resolveNip05, verifyNip05, getAllNip05s };
