@@ -60,9 +60,9 @@ nav {
   font-size: 0.75rem;
 }
 
-nav a { color: var(--text-muted); }
-nav a:hover { color: var(--text-dim); }
-nav a.active { color: var(--text); }
+nav a { color: var(--text-dim); }
+nav a:hover { color: var(--text); }
+nav a.active { color: #fff; }
 
 footer {
   margin-top: 4rem;
@@ -74,8 +74,8 @@ footer {
   gap: 0.5rem;
 }
 
-footer a { color: var(--text-muted); }
-footer a:hover { color: var(--text-dim); }
+footer a { color: var(--text-dim); }
+footer a:hover { color: var(--text); }
 footer .sep { color: var(--text-faint); }
 footer .credit { margin-left: auto; color: var(--text-muted); }
 
@@ -126,9 +126,9 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   color: var(--text);
   text-decoration: none;
 }
+.leaderboard .identity a:hover { text-decoration: underline; text-decoration-color: var(--text-dim); }
 
 .npub-short { color: var(--text-muted); }
-.leaderboard .identity a:hover { text-decoration: underline; }
 
 .leaderboard .month { color: var(--text-dim); white-space: nowrap; }
 .leaderboard .age { color: var(--text-muted); white-space: nowrap; }
