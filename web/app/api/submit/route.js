@@ -38,6 +38,14 @@ export async function POST(request) {
     return Response.json({ error: 'Proof already submitted', proof_id: id }, { status: 409 });
   }
 
+  const olderProof = await db.execute({
+    sql: 'SELECT proof_id FROM proofs WHERE identity = ? AND CAST(block_month AS INTEGER) <= CAST(? AS INTEGER)',
+    args: [result.identity, result.block_month],
+  });
+  if (olderProof.rows.length > 0) {
+    return Response.json({ error: 'An older proof already exists for this identity' }, { status: 409 });
+  }
+
   await db.execute({
     sql: `INSERT INTO proofs (proof_id, proof, identity, identity_type, block_month, block_inclusion_root, status, created_at)
           VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,

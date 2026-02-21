@@ -14,10 +14,24 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
 
   const whereArgs = query ? [`%${query}%`, `%${query}%`] : [];
 
+  const dedup = `SELECT proof_id, identity, identity_type, block_month, nip05
+    FROM proofs p1
+    WHERE status = 'verified'
+    AND CAST(block_month AS INTEGER) = (
+      SELECT MIN(CAST(block_month AS INTEGER))
+      FROM proofs p2
+      WHERE p2.identity = p1.identity AND p2.status = 'verified'
+    )
+    AND p1.rowid = (
+      SELECT MIN(p3.rowid) FROM proofs p3
+      WHERE p3.identity = p1.identity AND p3.status = 'verified'
+      AND CAST(p3.block_month AS INTEGER) = CAST(p1.block_month AS INTEGER)
+    )`;
+
   const countResult = await db.execute({
     sql: query
-      ? "SELECT COUNT(*) as total FROM proofs WHERE status = 'verified' AND (identity LIKE ? OR nip05 LIKE ?)"
-      : "SELECT COUNT(*) as total FROM proofs WHERE status = 'verified'",
+      ? `SELECT COUNT(*) as total FROM (${dedup}) WHERE identity LIKE ? OR nip05 LIKE ?`
+      : `SELECT COUNT(*) as total FROM (${dedup})`,
     args: whereArgs,
   });
   const total = Number(countResult.rows[0].total);
@@ -25,9 +39,8 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
 
   const result = await db.execute({
     sql: `SELECT * FROM (
-      SELECT proof_id, identity, identity_type, block_month, nip05,
-        ROW_NUMBER() OVER (ORDER BY CAST(block_month AS INTEGER) ASC) as rank
-      FROM proofs WHERE status = 'verified'
+      SELECT *, ROW_NUMBER() OVER (ORDER BY CAST(block_month AS INTEGER) ASC) as rank
+      FROM (${dedup})
     ) WHERE ${query ? '(identity LIKE ? OR nip05 LIKE ?)' : '1=1'} LIMIT ? OFFSET ?`,
     args: [...whereArgs, PER_PAGE, offset],
   });
