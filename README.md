@@ -6,7 +6,7 @@ og-zkp allows you to privately prove the calendar month (e.g January 2011) you f
 
 You sign a message with a Bitcoin private key. The og-zkp prover will then trace the key back to it's first received transaction, verify that transaction was included in a real Bitcoin block, attests to the calendar month that block was mined and collapses all of that into a single zero-knowledge proof.
 
-The verifier learns only two things: your identity and the month you first received Bitcoin. Nothing else leaks.
+You can attest to a known identity, or a throwaway anonymous identity. The verifier learns only two things: your identity and the month you first received Bitcoin. Nothing else leaks.
 
 ![](demo.svg)
 
