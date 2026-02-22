@@ -29,7 +29,7 @@ export default function ProofClient({ proof }) {
   return (
     <>
       {isVerified && proof.attestation_url && (
-        <AttestationDisplay url={proof.attestation_url} />
+        <AttestationDisplay url={proof.attestation_url} attestString={attestString} />
       )}
 
       {!isVerified && (
@@ -74,26 +74,35 @@ function nostrNjumpUrl(url) {
   return null;
 }
 
-function AttestationDisplay({ url }) {
+function AttestationDisplay({ url, attestString }) {
   const isXAttestation = url.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/);
   const njumpUrl = !isXAttestation ? nostrNjumpUrl(url) : null;
 
   return (
     <div className="section">
       <div className="section-title">attestation</div>
-      <div className="code-block">
-        <pre>{url}</pre>
-        <CopyButton text={url} />
-      </div>
-      {isXAttestation && (
-        <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
-          <a href={url} target="_blank" rel="noopener">{url}</a>
-        </div>
-      )}
-      {njumpUrl && (
-        <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
-          <a href={njumpUrl} target="_blank" rel="noopener">{njumpUrl}</a>
-        </div>
+      {isXAttestation ? (
+        <>
+          <div className="code-block">
+            <pre>{attestString}</pre>
+            <CopyButton text={attestString} />
+          </div>
+          <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
+            <a href={url} target="_blank" rel="noopener">{url}</a>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="code-block">
+            <pre>{url}</pre>
+            <CopyButton text={url} />
+          </div>
+          {njumpUrl && (
+            <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
+              <a href={njumpUrl} target="_blank" rel="noopener">{njumpUrl}</a>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
