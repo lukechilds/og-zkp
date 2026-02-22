@@ -45,7 +45,7 @@ export default function ProofClient({ proof }) {
 
       <div className="section">
         <div className="section-title">proof</div>
-        <div style={{ fontSize: '0.7rem', marginBottom: '0.75rem' }}>id: <span style={{ color: 'var(--text-muted)' }}>{proof.proof_id}</span></div>
+        <div style={{ fontSize: '0.7rem', marginBottom: '0.75rem' }}><span style={{ color: 'var(--text-muted)' }}>id:</span> {proof.proof_id}</div>
         <div className="code-block">
           <pre>{proof.proof}</pre>
           <CopyButton text={proof.proof} />
