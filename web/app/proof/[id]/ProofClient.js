@@ -77,6 +77,7 @@ function nostrNjumpUrl(url) {
 function AttestationDisplay({ url, attestString }) {
   const isXAttestation = url.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/);
   const njumpUrl = !isXAttestation ? nostrNjumpUrl(url) : null;
+  const formattedUrl = (() => { try { return JSON.stringify(JSON.parse(url), null, 2); } catch { return url; } })();
 
   return (
     <div className="section">
@@ -94,8 +95,8 @@ function AttestationDisplay({ url, attestString }) {
       ) : (
         <>
           <div className="code-block">
-            <pre>{url}</pre>
-            <CopyButton text={url} />
+            <pre>{formattedUrl}</pre>
+            <CopyButton text={formattedUrl} />
           </div>
           {njumpUrl && (
             <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
