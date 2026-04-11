@@ -76,7 +76,7 @@ pub async fn run(
                 Ok(None) => bail!("No transactions found for address"),
                 Err(e) => bail!("Failed to fetch transactions: {}", e),
             };
-            status!("First seen txid: {txid}");
+            status!("First seen txid:\n{txid}");
             status!("Fetching raw tx...");
             fetch_raw_tx(mempool_api, &txid)
                 .await

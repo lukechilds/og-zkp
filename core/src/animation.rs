@@ -16,28 +16,41 @@ fn sha256_hex(input: &[u8]) -> String {
     hex::encode(sha256::Hash::hash(input).to_byte_array())
 }
 
+fn render_overlay(out: &mut impl Write, hash: &str, text: &str) {
+    let trimmed = text.trim_end_matches("...").to_lowercase();
+    let display = if trimmed.len() == hash.len() {
+        trimmed
+    } else {
+        format!(" {trimmed} ")
+    };
+    let h_len = hash.len();
+    let t_len = display.len();
+    if t_len >= h_len {
+        writeln!(out, "\x1b[0m{}", &display[..h_len]).ok();
+    } else {
+        let start = (h_len - t_len) / 2;
+        let end = start + t_len;
+        writeln!(
+            out,
+            "\x1b[90m{}\x1b[0m{}\x1b[0;90m{}\x1b[0m",
+            &hash[..start],
+            display,
+            &hash[end..],
+        )
+        .ok();
+    }
+}
+
 fn render(out: &mut impl Write, lines: &[String], status: &str) {
+    let status_lines: Vec<&str> = status.lines().collect();
     write!(out, "\x1b[{}A", NUM_LINES).ok();
     for (i, hash) in lines.iter().enumerate() {
         write!(out, "\r\x1b[2K").ok();
-        if i == MIDDLE && !status.is_empty() {
-            let trimmed = status.trim_end_matches("...").to_lowercase();
-            let display = format!(" {trimmed} ");
-            let h_len = hash.len();
-            let t_len = display.len();
-            if t_len >= h_len {
-                writeln!(out, "\x1b[0m{}", &display[..h_len]).ok();
+        if i >= MIDDLE {
+            if let Some(text) = status_lines.get(i - MIDDLE) {
+                render_overlay(out, hash, text);
             } else {
-                let start = (h_len - t_len) / 2;
-                let end = start + t_len;
-                writeln!(
-                    out,
-                    "\x1b[90m{}\x1b[0m{}\x1b[0;90m{}\x1b[0m",
-                    &hash[..start],
-                    display,
-                    &hash[end..],
-                )
-                .ok();
+                writeln!(out, "\x1b[90m{}\x1b[0m", hash).ok();
             }
         } else {
             writeln!(out, "\x1b[90m{}\x1b[0m", hash).ok();
