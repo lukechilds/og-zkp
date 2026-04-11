@@ -15,9 +15,9 @@ fn sha256_hex(input: &[u8]) -> String {
 }
 
 fn render(out: &mut impl Write, lines: &[String], status: &str) {
-    write!(out, "\x1b8").ok();
+    write!(out, "\x1b[{}A", NUM_LINES).ok();
     for (i, hash) in lines.iter().enumerate() {
-        write!(out, "\x1b[2K").ok();
+        write!(out, "\r\x1b[2K").ok();
         if i == MIDDLE && !status.is_empty() {
             let trimmed = status.trim_end_matches("...").to_lowercase();
             let display = format!(" {trimmed} ");
@@ -81,14 +81,13 @@ impl Animation {
         ));
         let shared_c = Arc::clone(&shared);
 
-        // Claim vertical space, save cursor at animation top, hide cursor
+        // Claim vertical space for the animation block and hide the cursor.
         {
             let mut out = io::stderr();
             write!(out, "\x1b[?25l").ok();
             for _ in 0..NUM_LINES {
                 writeln!(out).ok();
             }
-            write!(out, "\x1b[{NUM_LINES}A\x1b7\x1b[{NUM_LINES}B").ok();
             out.flush().ok();
         }
 
