@@ -1,4 +1,5 @@
 use std::io::{self, Write};
+use std::sync::OnceLock;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -9,6 +10,7 @@ const NUM_LINES: usize = 9;
 const MIDDLE: usize = (NUM_LINES - 1) / 2;
 const INTERVAL: Duration = Duration::from_millis(100);
 const MIN_DISPLAY: Duration = Duration::from_secs(1);
+static CTRL_C_HANDLER: OnceLock<()> = OnceLock::new();
 
 fn sha256_hex(input: &[u8]) -> String {
     hex::encode(sha256::Hash::hash(input).to_byte_array())
@@ -60,6 +62,16 @@ pub struct Animation {
 
 impl Animation {
     pub fn start(seed: &str) -> Self {
+        CTRL_C_HANDLER.get_or_init(|| {
+            ctrlc::set_handler(|| {
+                let mut out = io::stderr();
+                write!(out, "\x1b[?25h").ok();
+                out.flush().ok();
+                std::process::exit(130);
+            })
+            .expect("failed to install Ctrl-C handler");
+        });
+
         // Build initial lines: each is sha256 of the previous
         let mut lines = Vec::with_capacity(NUM_LINES);
         let mut prev = sha256_hex(seed.as_bytes());
