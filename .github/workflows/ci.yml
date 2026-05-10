@@ -6,6 +6,10 @@ jobs:
   precache:
     runs-on: ubuntu-latest
     steps:
+      - &free-disk
+        name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+
       - &checkout
         name: Checkout
         uses: actions/checkout@v4
@@ -20,11 +24,19 @@ jobs:
           key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-deps-
 
-      - name: Fetch root workspace dependencies
-        run: cargo fetch --locked
+      - &install-risc0
+        name: Install RISC Zero toolchain (rzup)
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+          ~/.risc0/bin/rzup install rust 1.88.0
+          ~/.risc0/bin/rzup install cpp 2024.1.5
 
-      - name: Fetch guest dependencies
-        run: cargo fetch --manifest-path methods/guest/Cargo.toml --locked
+      - name: Compile root workspace
+        run: cargo build --workspace --all-targets --all-features
+
+      - name: Compile guest workspace
+        run: cargo build --manifest-path methods/guest/Cargo.toml --all-targets --all-features
 
   fmt:
     runs-on: ubuntu-latest
@@ -41,21 +53,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: precache
     steps:
-      - &free-disk
-        name: Free disk space
-        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+      - *free-disk
 
       - *checkout
 
       - *cargo-deps-cache
 
-      - &install-risc0
-        name: Install RISC Zero toolchain (rzup)
-        run: |
-          curl -L https://risczero.com/install | bash
-          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-          ~/.risc0/bin/rzup install rust 1.88.0
-          ~/.risc0/bin/rzup install cpp 2024.1.5
+      - *install-risc0
 
       - name: Run root workspace clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
