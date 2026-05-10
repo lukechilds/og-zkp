@@ -23,13 +23,13 @@ export async function generateMetadata({ params }) {
 
   const month = formatMonth(proof.block_month);
   const rank = getRank(proof.block_month);
-  const status = proof.status === 'verified' ? 'Verified' : 'Pending';
+  const status = proof.status === 'verified' ? 'verified' : 'pending';
   const displayName = proof.nip05 || proof.identity;
   return {
     title: `${displayName} - og-zkp`,
     openGraph: {
       title: `${displayName} - og-zkp`,
-      description: `${status} — ${rank} — Bitcoiner since ${month}`,
+      description: `${status} — ${rank.toLowerCase()} — bitcoiner since ${month}`,
       url: `https://og-zkp.com/proof/${proof.proof_id}`,
     },
     twitter: {

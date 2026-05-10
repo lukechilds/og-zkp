@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'og-zkp - Prove your Bitcoin OG status in zero-knowledge';
+export const alt = 'og-zkp - prove your bitcoin og status in zero-knowledge';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -29,7 +29,7 @@ export default async function Image() {
           og-zkp
         </div>
         <div style={{ color: '#666666', fontSize: 28, marginTop: 24 }}>
-          Prove your Bitcoin OG status in zero-knowledge
+          prove your bitcoin og status in zero-knowledge
         </div>
       </div>
     ),

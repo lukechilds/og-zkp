@@ -184,7 +184,7 @@ export default function SubmitForm({ onSuccess }) {
       if (onSuccess) onSuccess();
       router.push('/proof/' + data.proof_id);
     } catch (err) {
-      setError(err.message);
+      setError(err.message.toLowerCase());
       setSubmitting(false);
     }
   }

@@ -31,7 +31,7 @@ const mono = JetBrains_Mono({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'og-zkp',
-  description: 'Prove your Bitcoin OG status in zero-knowledge',
+  description: 'prove your bitcoin og status in zero-knowledge',
   openGraph: {
     siteName: 'og-zkp',
     url: 'https://og-zkp.com',
@@ -73,10 +73,10 @@ export default function RootLayout({ children }) {
           </header>
           <main>{children}</main>
           <footer>
-            <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">Source code</a>
+            <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">source code</a>
             <span className="sep">-</span>
-            <a href="https://github.com/lukechilds/og-zkp/issues" target="_blank" rel="noopener">Report a bug</a>
-            <span className="credit">A thing by <a href="https://lu.ke" target="_blank" rel="noopener">@lukechilds</a></span>
+            <a href="https://github.com/lukechilds/og-zkp/issues" target="_blank" rel="noopener">report a bug</a>
+            <span className="credit">a thing by <a href="https://lu.ke" target="_blank" rel="noopener">@lukechilds</a></span>
           </footer>
         </div>
       </body>

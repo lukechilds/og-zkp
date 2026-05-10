@@ -38,7 +38,7 @@ export default async function Image({ params }) {
             fontSize: 36,
           }}
         >
-          Proof not found
+          proof not found
         </div>
       ),
       {
@@ -61,7 +61,7 @@ export default async function Image({ params }) {
     displayName = `${proof.identity.slice(0, 8)}...${proof.identity.slice(-6)}`;
   }
   const isVerified = proof.status === 'verified';
-  const status = isVerified ? 'Verified' : 'Pending';
+  const status = isVerified ? 'verified' : 'pending';
   const statusColor = isVerified ? '#22c55e' : '#f59e0b';
   const month = formatMonth(proof.block_month);
   const rank = getRank(proof.block_month);
@@ -115,7 +115,7 @@ export default async function Image({ params }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, color: '#999999', fontSize: 28 }}>
           <span style={{ color: rankColor, fontSize: 24, border: `1px solid ${rankColor}40`, borderRadius: 6, padding: '4px 14px', background: `${rankColor}18`, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{rank}</span>
-          {`Bitcoin OG since ${month}`}
+          {`bitcoin og since ${month}`}
         </div>
       </div>
     ),

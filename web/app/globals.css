@@ -114,6 +114,8 @@ header {
   font-size: 0.85rem;
   font-weight: 500;
   margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .modal-close {

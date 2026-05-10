@@ -134,7 +134,7 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
       setSuccess('attestation verified!');
       setTimeout(() => onVerified(), 1500);
     } catch (err) {
-      setError(err.message);
+      setError(err.message.toLowerCase());
       setSubmitting(false);
     }
   }
@@ -146,24 +146,24 @@ function AttestationForm({ proofId, identity, isX, attestString, pageUrl, onVeri
         {isX ? (
           <ol>
             <li>
-              Post a tweet from <strong>{identity}</strong> with this exact text:
+              post a tweet from <strong>{identity}</strong> with this exact text:
               <div className="code-block">
                 <pre>{attestString}</pre>
                 <CopyButton text={attestString} />
               </div>
             </li>
-            <li>Paste the tweet URL below</li>
+            <li>paste the tweet URL below</li>
           </ol>
         ) : (
           <ol>
             <li>
-              Sign a Nostr note from your npub with this exact text:
+              sign a nostr note from your npub with this exact text:
               <div className="code-block">
                 <pre>{attestString}</pre>
                 <CopyButton text={attestString} />
               </div>
             </li>
-            <li>Paste the nevent or raw signed event JSON below</li>
+            <li>paste the nevent or raw signed event JSON below</li>
           </ol>
         )}
       </div>
