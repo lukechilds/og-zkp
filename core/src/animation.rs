@@ -162,7 +162,12 @@ impl Animation {
     /// Ensures the previous status was visible for at least MIN_DISPLAY.
     pub fn set_status(&self, text: &str) {
         // Wait for previous status to have been shown long enough
-        let remaining = self.shared.0.lock().unwrap().rendered_at
+        let remaining = self
+            .shared
+            .0
+            .lock()
+            .unwrap()
+            .rendered_at
             .and_then(|t| MIN_DISPLAY.checked_sub(t.elapsed()));
         if let Some(d) = remaining {
             thread::sleep(d);

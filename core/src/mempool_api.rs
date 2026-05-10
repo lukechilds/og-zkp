@@ -33,10 +33,7 @@ async fn fetch_txids(
     Ok(txs.into_iter().map(|t| t.txid).collect())
 }
 
-pub async fn find_first_seen_txid(
-    endpoint: &str,
-    address: &str,
-) -> Result<Option<String>> {
+pub async fn find_first_seen_txid(endpoint: &str, address: &str) -> Result<Option<String>> {
     // Walk pages using the second-to-last txid as the cursor until only one remains
     let mut after_txid = None;
     loop {

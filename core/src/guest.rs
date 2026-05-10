@@ -221,8 +221,7 @@ mod tests {
         let sig_bytes = BASE64_STANDARD
             .decode("IEfY9NgVNcWF863TzdsnMBrfC9WQ3S+/Fb29r217ofHZNVwWa/R+JpTluVRuQif+cOAcbcv1qpR2L57n8slmzQU=")
             .unwrap();
-        let pubkey =
-            recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
+        let pubkey = recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
         let script = pubkey_to_output_script(pubkey, AddressKind::P2sh);
         let tx_hex = "0100000001c2360d0a190fde0962096ff2b05c5fafea40c1927852096671f2120f72fbb92c000000008a473044022037efa5e6ed145347836edac5cafc6f1c9485d430a608f11cc6f098f6236c3f8a0220070b5ef93b4ebe118d42ee8cb8c052511408943d45e76458f3292dd978a8fac60141040e3a759c33b03e1af8e5d86fb447a40eff244c847a4f8274276db490054e8be076f8801ddc9c5246ee86b6f33cfe38e8b7e57ab9db390eb3ec1ec6ae9eeea113fdffffff02102700000000000017a914d2d309d3d7ed9ee462e3643d7215951e0bd742c68721e61c00000000001976a914da6473ed373e08f46dd8003fca7ba72fbe9c555e88ac73a20800";
         let tx_bytes = hex::decode(tx_hex).unwrap();
@@ -239,8 +238,7 @@ mod tests {
         let sig_bytes = BASE64_STANDARD
             .decode("Hy4jk2Sa62j6xN0ud5QqJTlzXuM8sn/g+TevYcBwLiJcAWc/9+4B0ljQgTD+5hp1KMvROkW4k1MYGigbza1K+ZU=")
             .unwrap();
-        let pubkey =
-            recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
+        let pubkey = recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
         let script = pubkey_to_output_script(pubkey, AddressKind::P2wpkh);
         let tx_hex = "0100000001b202eaa7a6aab448409199997f246be312dc45cee432024c8b90e0c13236853a010000008a4730440220276fdcb55fe9f28975481f7612584d45feed0901758be48453fd1f6c139d573a022020e12c981bb5ce19f845b57440942df53b002e74c44d50a51a9ee030a1f1ea6e0141040e3a759c33b03e1af8e5d86fb447a40eff244c847a4f8274276db490054e8be076f8801ddc9c5246ee86b6f33cfe38e8b7e57ab9db390eb3ec1ec6ae9eeea113fdffffff021027000000000000160014ff2d9201f8d1585f7210d1d395ab5695b101936d649f1c00000000001976a914da6473ed373e08f46dd8003fca7ba72fbe9c555e88ac73a20800";
         let tx_bytes = hex::decode(tx_hex).unwrap();
@@ -257,8 +255,7 @@ mod tests {
         let sig_bytes = BASE64_STANDARD
             .decode("IOVIcHmzE1koFMStNWd7i3mBWsOjU8Xwy0vSFEk8WU96WPNlrcNlW9lB0Gcx+38MB9UQ1B5IqeYpCEauF8aVxpU=")
             .unwrap();
-        let pubkey =
-            recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
+        let pubkey = recover_pubkey_from_bitcoin_signed_message(&sig_bytes, P2PKH_MESSAGE).unwrap();
         let script = pubkey_to_output_script(pubkey, AddressKind::P2tr);
         let tx_hex = "01000000000101d528565e141e0e35e1878e2ea25d347196706dd3b75d85f8a8882f14775870280600000000ffffffff059104000000000000160014798bbdd9e1748f67c0204b0915a03d46c61ab2771413010000000000225120ff2d9c184a9a439c27231e37c5a811e1ee4117c8389144b7bd85bb29672ec8a0599e05000000000017a914fca7c972b1b29359db9496a9ae6f6b3c049d998b878849000000000000160014b12d73d1ba48a7df0571d9de2a546db6f56bb313837d4e5401000000160014eed12e1ba4703f0a6afe1a3dd4a3b1de86803936024730440220553033d4d5019ccfec66cf3fb94bd00fe26f381ecdaa0f2128e79029a2f3cc60022019e044e808e4aa9d415b9f3f161e286719dbab69155ce4bbb5be523c82b995f5012103a876001a753b82a8bec93c5936e65e0bacacebe5de6ca74adadfced8ebb7ad5300000000";
         let tx_bytes = hex::decode(tx_hex).unwrap();

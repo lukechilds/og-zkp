@@ -10,7 +10,9 @@ fn parse_image_id(hex_str: &str) -> [u32; 8] {
 }
 
 fn main() {
-    let proof = std::env::args().nth(1).expect("usage: og-zkp-verifier <proof>");
+    let proof = std::env::args()
+        .nth(1)
+        .expect("usage: og-zkp-verifier <proof>");
     let image_id = parse_image_id(include_str!("../../host/expected-image-id"));
     match og_zkp_core::verify::verify_and_extract(&proof, image_id) {
         Ok(result) => {
