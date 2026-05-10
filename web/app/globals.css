@@ -107,6 +107,7 @@ header {
   max-height: 90vh;
   width: 90%;
   overflow-y: auto;
+  overflow-anchor: none;
   position: relative;
 }
 

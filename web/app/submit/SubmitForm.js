@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 const WALLETS = {
@@ -58,7 +58,7 @@ function CodeBlock({ children }) {
   );
 }
 
-function ProofGuide() {
+function ProofGuide({ guideRef }) {
   const [wallet, setWallet] = useState('core');
   const [identity, setIdentity] = useState('');
   const [address, setAddress] = useState('');
@@ -78,7 +78,7 @@ function ProofGuide() {
   ].join('\n');
 
   return (
-    <div className="proof-guide">
+    <div className="proof-guide" ref={guideRef}>
       <div className="section-title">generate a proof</div>
       <div className="guide-fields">
         <div className="field">
@@ -158,6 +158,38 @@ export default function SubmitForm({ onSuccess }) {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const guideRef = useRef(null);
+
+  useEffect(() => {
+    if (!showGuide) return;
+
+    let secondFrame;
+    const resetScroll = () => {
+      const guide = guideRef.current;
+      const modal = guide?.closest('.modal');
+      if (modal) {
+        modal.scrollTop = 0;
+      } else if (guide) {
+        guide.scrollIntoView({ block: 'start' });
+      }
+    };
+
+    resetScroll();
+    const firstFrame = requestAnimationFrame(() => {
+      resetScroll();
+      secondFrame = requestAnimationFrame(resetScroll);
+    });
+
+    return () => {
+      cancelAnimationFrame(firstFrame);
+      if (secondFrame) cancelAnimationFrame(secondFrame);
+    };
+  }, [showGuide]);
+
+  function openGuide(e) {
+    e.currentTarget.blur();
+    setShowGuide(true);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -191,7 +223,7 @@ export default function SubmitForm({ onSuccess }) {
 
   return (
     <>
-      {showGuide && <ProofGuide />}
+      {showGuide && <ProofGuide guideRef={guideRef} />}
 
       <form onSubmit={handleSubmit}>
         <label htmlFor="proof">
@@ -202,7 +234,7 @@ export default function SubmitForm({ onSuccess }) {
               <button
                 type="button"
                 className="inline-link"
-                onClick={() => setShowGuide(true)}
+                onClick={openGuide}
               >
                 how to generate a proof
               </button>
