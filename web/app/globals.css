@@ -164,6 +164,30 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   border-bottom: 1px solid var(--border);
 }
 
+.rank-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rank-info-button {
+  width: 0.65rem;
+  height: 0.65rem;
+  padding: 0;
+  border: 1px solid var(--text-faint);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.45rem;
+  line-height: 0.6rem;
+  text-align: center;
+}
+
+.rank-info-button:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
 .leaderboard td {
   padding: 0.5rem 0;
   font-size: 0.8rem;
@@ -241,6 +265,8 @@ footer .credit { margin-left: auto; color: var(--text-muted); }
   font-size: 0.75rem;
   color: var(--text-dim);
   margin-bottom: 1.25rem;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .rank-table {

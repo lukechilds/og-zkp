@@ -3,6 +3,7 @@ import { getDb, migrate } from '../lib/db';
 import { formatMonth, formatAge, getRank } from '../lib/date';
 import NostrName from './NostrName';
 import RankBadge from './RankBadge';
+import RankInfoButton from './RankInfoButton';
 
 const PER_PAGE = 15;
 
@@ -63,7 +64,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
               <th className="rank">#</th>
               <th className="crown-cell"></th>
               <th>identity</th>
-              <th>rank</th>
+              <th><span className="rank-heading">rank <RankInfoButton /></span></th>
               <th>bitcoiner since</th>
               <th>age</th>
             </tr>
