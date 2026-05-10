@@ -126,6 +126,42 @@ fn verify_rejects_fake_genesis_root_proof() {
 }
 
 #[test]
+fn prove_reports_supported_tip_when_block_is_not_in_inclusion_root() {
+    let mut merkle_block: MerkleBlock =
+        consensus::encode::deserialize(&hex::decode(P2PKH_SPV_PROOF).unwrap()).unwrap();
+    merkle_block.header.nonce ^= 1;
+    let unknown_tip_spv_proof = hex::encode(consensus::encode::serialize(&merkle_block));
+
+    Command::cargo_bin("og-zkp")
+        .unwrap()
+        .env("RISC0_DEV_MODE", "1")
+        .args([
+            "prove",
+            "--no-animation",
+            "--message",
+            P2PKH_MESSAGE,
+            "--signature",
+            P2PKH_SIGNATURE,
+            "--address",
+            P2PKH_ADDRESS,
+            "--transaction",
+            P2PKH_TRANSACTION,
+            "--spv-proof",
+            &unknown_tip_spv_proof,
+            "--mempool-api",
+            "http://127.0.0.1:9",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "Transaction block is not in the block inclusion root",
+        ))
+        .stderr(predicate::str::contains(format!(
+            "only supports proofs up to block height {EXPECTED_INCLUSION_HEIGHT} / tip {EXPECTED_INCLUSION_TIP}"
+        )));
+}
+
+#[test]
 fn prove_then_verify_p2pkh() {
     // Inputs
     let message = "og-zkp x.com/lukechilds";

@@ -10,11 +10,7 @@ pub fn run(version: &str, image_id: &[u32; 8], json: bool) -> Result<()> {
         .map(|b| format!("{b:02x}"))
         .collect();
 
-    let hashes = block_inclusion_proof::get_block_hashes();
-    let mut tip = *hashes.last().expect("non-empty block list");
-    tip.reverse();
-    let inclusion_tip = hex::encode(tip);
-    let inclusion_height = hashes.len() - 1;
+    let (inclusion_height, inclusion_tip) = block_inclusion_proof::headers_tip();
 
     if json {
         let output = serde_json::json!({

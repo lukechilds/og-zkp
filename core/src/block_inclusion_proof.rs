@@ -23,6 +23,14 @@ pub fn headers_merkle_root() -> [u8; 32] {
         .expect("non-empty")
 }
 
+#[cfg(feature = "host")]
+pub fn headers_tip() -> (usize, String) {
+    let hashes = get_block_hashes();
+    let mut tip = *hashes.last().expect("non-empty block list");
+    tip.reverse();
+    (hashes.len() - 1, hex::encode(tip))
+}
+
 // Produce a single serialized proof blob:
 // 4 byte index + 4 byte total_leaves + proof bytes
 #[cfg(feature = "host")]

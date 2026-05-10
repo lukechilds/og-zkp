@@ -12,7 +12,7 @@ use base64::prelude::*;
 
 use crate::animation::Animation;
 use crate::block_inclusion_proof::{
-    generate_header_merkle_proof, headers_merkle_root, verify_header_merkle_proof,
+    generate_header_merkle_proof, headers_merkle_root, headers_tip, verify_header_merkle_proof,
 };
 use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
@@ -118,8 +118,15 @@ pub async fn run(args: ProveArgs<'_>) -> Result<()> {
     let merkle_block: MerkleBlock =
         consensus::encode::deserialize(&spv_proof_bytes).context("Failed to parse SPV proof")?;
     let block_hash = merkle_block.header.block_hash().to_byte_array();
-    let header_proof =
-        generate_header_merkle_proof(block_hash).context("Header not found in known header set")?;
+    let header_proof = generate_header_merkle_proof(block_hash).with_context(|| {
+        let (height, tip) = headers_tip();
+        format!(
+            "Transaction block is not in the block inclusion root. \
+             This og-zkp build only supports proofs up to block height {height} / tip {tip}. \
+             If this transaction confirmed after that tip, update og-zkp or wait for a release \
+             with a newer block list."
+        )
+    })?;
     let block_inclusion_root = headers_merkle_root();
     anyhow::ensure!(
         verify_header_merkle_proof(block_hash, &header_proof, block_inclusion_root),
