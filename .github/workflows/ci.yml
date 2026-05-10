@@ -3,6 +3,51 @@ name: CI
 on: push
 
 jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check root workspace formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check guest formatting
+        run: cargo fmt --manifest-path methods/guest/Cargo.toml -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+            methods/guest/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install RISC Zero toolchain (rzup)
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+          ~/.risc0/bin/rzup install rust 1.88.0
+          ~/.risc0/bin/rzup install cpp 2024.1.5
+
+      - name: Run root workspace clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run guest clippy
+        run: cargo clippy --manifest-path methods/guest/Cargo.toml --all-targets --all-features -- -D warnings
+
   unit:
     runs-on: ubuntu-latest
     steps:

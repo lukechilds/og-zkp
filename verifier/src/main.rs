@@ -22,14 +22,14 @@ fn main() {
                 "block_month": result.block_month,
                 "identity": result.identity,
             });
-            println!("{}", output);
+            println!("{output}");
         }
         Err(e) => {
             let output = serde_json::json!({
                 "valid": false,
                 "error": e.to_string(),
             });
-            println!("{}", output);
+            println!("{output}");
             std::process::exit(1);
         }
     }
