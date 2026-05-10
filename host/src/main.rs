@@ -66,17 +66,17 @@ async fn main() -> anyhow::Result<()> {
             json,
             no_animation,
         } => {
-            og_zkp_core::prove::run(
-                methods::OG_ZKP_ELF,
-                &message,
-                &signature,
-                &address,
-                &mempool_api,
+            og_zkp_core::prove::run(og_zkp_core::prove::ProveArgs {
+                elf: methods::OG_ZKP_ELF,
+                message: &message,
+                signature: &signature,
+                address: &address,
+                mempool_api: &mempool_api,
                 transaction,
                 spv_proof,
                 json,
                 no_animation,
-            )
+            })
             .await
         }
         Commands::Verify { receipt, json } => {

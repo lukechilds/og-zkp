@@ -18,17 +18,31 @@ use crate::mempool_api::{fetch_raw_tx, fetch_spv_proof, find_first_seen_txid};
 use crate::receipt::serialize_receipt;
 use crate::AddressKind;
 
-pub async fn run(
-    elf: &[u8],
-    message: &str,
-    signature: &str,
-    address: &str,
-    mempool_api: &str,
-    transaction: Option<String>,
-    spv_proof: Option<String>,
-    json: bool,
-    no_animation: bool,
-) -> Result<()> {
+pub struct ProveArgs<'a> {
+    pub elf: &'a [u8],
+    pub message: &'a str,
+    pub signature: &'a str,
+    pub address: &'a str,
+    pub mempool_api: &'a str,
+    pub transaction: Option<String>,
+    pub spv_proof: Option<String>,
+    pub json: bool,
+    pub no_animation: bool,
+}
+
+pub async fn run(args: ProveArgs<'_>) -> Result<()> {
+    let ProveArgs {
+        elf,
+        message,
+        signature,
+        address,
+        mempool_api,
+        transaction,
+        spv_proof,
+        json,
+        no_animation,
+    } = args;
+
     let seed = format!("{message}{signature}{address}");
     let anim = if !json && !no_animation && std::io::stderr().is_terminal() {
         Some(Animation::start(&seed))

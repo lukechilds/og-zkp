@@ -43,17 +43,17 @@ fn render_overlay(out: &mut impl Write, hash: &str, text: &str) {
 
 fn render(out: &mut impl Write, lines: &[String], status: &str) {
     let status_lines: Vec<&str> = status.lines().collect();
-    write!(out, "\x1b[{}A", NUM_LINES).ok();
+    write!(out, "\x1b[{NUM_LINES}A").ok();
     for (i, hash) in lines.iter().enumerate() {
         write!(out, "\r\x1b[2K").ok();
         if i >= MIDDLE {
             if let Some(text) = status_lines.get(i - MIDDLE) {
                 render_overlay(out, hash, text);
             } else {
-                writeln!(out, "\x1b[90m{}\x1b[0m", hash).ok();
+                writeln!(out, "\x1b[90m{hash}\x1b[0m").ok();
             }
         } else {
-            writeln!(out, "\x1b[90m{}\x1b[0m", hash).ok();
+            writeln!(out, "\x1b[90m{hash}\x1b[0m").ok();
         }
     }
     write!(out, "\x1b[J").ok();
