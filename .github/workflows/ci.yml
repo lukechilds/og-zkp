@@ -14,17 +14,25 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
 
-      - &cargo-cache
-        name: Cache Cargo
+      - &cargo-deps-cache
+        name: Cache Cargo dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
+          key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-deps-
+
+      - &cargo-target-cache
+        name: Cache Cargo targets
+        uses: actions/cache@v4
+        with:
+          path: |
             target
             methods/guest/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/*', '!web/**', '!**/README.md', '!media/**', '!.git/**') }}
+          restore-keys: ${{ runner.os }}-cargo-target-
 
       - &install-risc0
         name: Install RISC Zero toolchain (rzup)
@@ -59,7 +67,9 @@ jobs:
 
       - *checkout
 
-      - *cargo-cache
+      - *cargo-deps-cache
+
+      - *cargo-target-cache
 
       - *install-risc0
 
@@ -77,7 +87,9 @@ jobs:
 
       - *checkout
 
-      - *cargo-cache
+      - *cargo-deps-cache
+
+      - *cargo-target-cache
 
       - *install-risc0
 
@@ -92,7 +104,9 @@ jobs:
 
       - *checkout
 
-      - *cargo-cache
+      - *cargo-deps-cache
+
+      - *cargo-target-cache
 
       - *install-risc0
 
@@ -110,7 +124,9 @@ jobs:
 
       - *checkout
 
-      - *cargo-cache
+      - *cargo-deps-cache
+
+      - *cargo-target-cache
 
       - *install-risc0
 
