@@ -6,14 +6,70 @@ use predicates::prelude::*;
 use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts};
 use serde_json::Value;
 use std::env;
-use std::process::Command;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::{Command, Output};
 use std::sync::Mutex;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 // End-to-end test: prove then verify. Uses RISC0_DEV_MODE.
 // This test exercises the CLI with real network calls unless tx/proof are provided.
 // To keep it fast we rely on dev mode proving which does not produce valid proofs outside of dev mode.
 
 static RISC0_DEV_MODE_LOCK: Mutex<()> = Mutex::new(());
+
+struct TempDir {
+    path: PathBuf,
+}
+
+impl TempDir {
+    fn new(prefix: &str) -> Self {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = env::temp_dir().join(format!("{prefix}-{}-{suffix}", std::process::id()));
+        fs::create_dir_all(&path).unwrap();
+        Self { path }
+    }
+}
+
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.path);
+    }
+}
+
+struct DockerImage(String);
+
+impl Drop for DockerImage {
+    fn drop(&mut self) {
+        let _ = Command::new("docker")
+            .args(["image", "rm", "-f", &self.0])
+            .output();
+    }
+}
+
+fn command_output(command: &mut Command, label: &str) -> Output {
+    let output = command
+        .output()
+        .unwrap_or_else(|err| panic!("failed to run {label}: {err}"));
+    assert!(
+        output.status.success(),
+        "{label} failed with status {}\nstdout:\n{}\nstderr:\n{}",
+        output.status,
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    output
+}
+
+fn repo_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .to_path_buf()
+}
 
 fn prove_then_verify(
     message: &str,
@@ -159,6 +215,105 @@ fn prove_reports_supported_tip_when_block_is_not_in_inclusion_root() {
         .stderr(predicate::str::contains(format!(
             "only supports proofs up to block height {EXPECTED_INCLUSION_HEIGHT} / tip {EXPECTED_INCLUSION_TIP}"
         )));
+}
+
+#[test]
+fn docker_image_prove_then_verify_dev_mode() {
+    if env::var_os("OG_ZKP_TEST_MEMPOOL_LOOKUP").is_some() {
+        eprintln!("skipping Docker e2e in mempool lookup mode");
+        return;
+    }
+    if !(cfg!(target_os = "linux") && cfg!(target_arch = "x86_64")) {
+        eprintln!("skipping Docker e2e: test binary must be linux/amd64 for this image");
+        return;
+    }
+
+    let root = repo_root();
+    let context = TempDir::new("og-zkp-docker-e2e");
+    fs::copy(
+        root.join("docker/Dockerfile"),
+        context.path.join("Dockerfile"),
+    )
+    .unwrap();
+    fs::copy(
+        root.join("docker/groth16-shim.sh"),
+        context.path.join("groth16-shim.sh"),
+    )
+    .unwrap();
+    fs::copy(
+        PathBuf::from(env!("CARGO_BIN_EXE_og-zkp")),
+        context.path.join("og-zkp"),
+    )
+    .unwrap();
+
+    let image = DockerImage(format!(
+        "og-zkp:e2e-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    ));
+
+    let mut build = Command::new("docker");
+    build
+        .args(["build", "--platform", "linux/amd64", "-t", &image.0])
+        .arg(&context.path);
+    command_output(&mut build, "docker build");
+
+    // This keeps CI fast and verifies the Docker image can run the prove/verify CLI flow.
+    // It does not exercise the Groth16 Docker shim because dev mode skips real proving,
+    // and real Groth16 proving is too slow for this CI test.
+    let mut prove = Command::new("docker");
+    prove
+        .args([
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "-e",
+            "RISC0_DEV_MODE=1",
+            &image.0,
+        ])
+        .args([
+            "prove",
+            "--no-animation",
+            "--message",
+            P2PKH_MESSAGE,
+            "--address",
+            P2PKH_ADDRESS,
+            "--signature",
+            P2PKH_SIGNATURE,
+            "--transaction",
+            P2PKH_TRANSACTION,
+            "--spv-proof",
+            P2PKH_SPV_PROOF,
+        ]);
+    let prove_output = command_output(&mut prove, "docker prove");
+    let prove_stdout = String::from_utf8(prove_output.stdout).expect("utf8 prove stdout");
+    let receipt = prove_stdout
+        .lines()
+        .find(|line| line.starts_with("og-zkp1"))
+        .expect("receipt line present starting with og-zkp1")
+        .trim();
+
+    let mut verify = Command::new("docker");
+    verify
+        .args([
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "-e",
+            "RISC0_DEV_MODE=1",
+            &image.0,
+        ])
+        .args(["verify", receipt]);
+    let verify_output = command_output(&mut verify, "docker verify");
+    let verify_stdout = String::from_utf8(verify_output.stdout).expect("utf8 verify stdout");
+    assert!(verify_stdout.contains("OG Status: October 2018"));
+    assert!(verify_stdout.contains("Identity:  x.com/lukechilds"));
+    assert!(verify_stdout.contains("Proof is valid"));
 }
 
 #[test]
