@@ -24,7 +24,7 @@ export default function RankModal({ activeRank, onClose }) {
       >
         <button className="modal-close" onClick={onClose} aria-label="close">&times;</button>
         <h2 id="rank-modal-title">og ranks</h2>
-        <p className="rank-modal-desc">ranks are based on the year you first received Bitcoin.</p>
+        <p className="rank-modal-desc">ranks are based on the year you first received bitcoin</p>
         <table className="rank-table">
           <thead>
             <tr>
