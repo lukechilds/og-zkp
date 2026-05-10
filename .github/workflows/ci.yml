@@ -24,16 +24,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache
+      - name: Cache root workspace
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-            methods/guest/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Cache guest workspace target
+        uses: actions/cache@v4
+        with:
+          path: methods/guest/target
+          key: ${{ runner.os }}-cargo-guest-${{ hashFiles('methods/guest/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-guest-
 
       - name: Install RISC Zero toolchain (rzup)
         run: |
