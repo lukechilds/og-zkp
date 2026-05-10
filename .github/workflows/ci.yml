@@ -67,9 +67,6 @@ jobs:
       - name: Run unit tests
         run: cargo test --workspace --lib --bin og-zkp
 
-      - name: Run real verifier fixture tests
-        run: cargo test -p og-zkp-verifier
-
   e2e:
     runs-on: ubuntu-latest
     steps:
@@ -83,6 +80,9 @@ jobs:
 
       - name: Run e2e tests
         run: cargo test --test e2e
+
+      - name: Run real verifier fixture tests
+        run: cargo test -p og-zkp-verifier
 
   e2e-fetch:
     runs-on: ubuntu-latest
