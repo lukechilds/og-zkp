@@ -35,6 +35,7 @@ export default function Nav() {
               <li>Get listed as a verified Bitcoin OG</li>
             </ol>
             <p>Your address and exact date are kept private and never leave your computer. Only the calendar month and identity are revealed.</p>
+            <a className="btn-primary btn-link" href="https://github.com/lukechilds/og-zkp#readme" target="_blank" rel="noopener">read more</a>
           </div>
         </Modal>
       )}
