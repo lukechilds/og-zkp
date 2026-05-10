@@ -68,6 +68,11 @@ header {
   font-weight: 600;
 }
 
+.hash-tagline {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
 .header-actions {
   display: flex;
   gap: 1.5rem;
