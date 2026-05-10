@@ -130,5 +130,5 @@ jobs:
 
       - *install-risc0
 
-      - name: Run e2e tests
-        run: OG_ZKP_TEST_MEMPOOL_LOOKUP="1" cargo test --test e2e
+      - name: Run real lookup e2e tests
+        run: cargo test --test real_lookup
