@@ -3,7 +3,7 @@ name: CI
 on: push
 
 jobs:
-  clippy:
+  precache:
     runs-on: ubuntu-latest
     steps:
       - &free-disk
@@ -34,18 +34,16 @@ jobs:
           ~/.risc0/bin/rzup install rust 1.88.0
           ~/.risc0/bin/rzup install cpp 2024.1.5
 
-      - name: Run root workspace clippy
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Compile root workspace
+        run: cargo build --workspace --all-targets --all-features
 
-      - name: Run guest clippy
-        run: cargo clippy --manifest-path methods/guest/Cargo.toml --all-targets --all-features -- -D warnings
+      - name: Compile guest workspace
+        run: cargo build --manifest-path methods/guest/Cargo.toml --all-targets --all-features
 
   fmt:
     runs-on: ubuntu-latest
     steps:
       - *checkout
-
-      - *cargo-cache
 
       - name: Check root workspace formatting
         run: cargo fmt --all -- --check
@@ -53,8 +51,27 @@ jobs:
       - name: Check guest formatting
         run: cargo fmt --manifest-path methods/guest/Cargo.toml -- --check
 
+  clippy:
+    runs-on: ubuntu-latest
+    needs: precache
+    steps:
+      - *free-disk
+
+      - *checkout
+
+      - *cargo-cache
+
+      - *install-risc0
+
+      - name: Run root workspace clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run guest clippy
+        run: cargo clippy --manifest-path methods/guest/Cargo.toml --all-targets --all-features -- -D warnings
+
   unit:
     runs-on: ubuntu-latest
+    needs: precache
     steps:
       - *free-disk
 
@@ -69,6 +86,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    needs: precache
     steps:
       - *free-disk
 
@@ -86,6 +104,7 @@ jobs:
 
   e2e-fetch:
     runs-on: ubuntu-latest
+    needs: precache
     steps:
       - *free-disk
 
