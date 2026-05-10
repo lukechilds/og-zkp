@@ -1,12 +1,19 @@
 use assert_cmd::prelude::*;
+use base64::prelude::*;
+use bitcoin::hashes::Hash as _;
+use bitcoin::{consensus, MerkleBlock};
 use predicates::prelude::*;
+use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts};
 use serde_json::Value;
 use std::env;
 use std::process::Command;
+use std::sync::Mutex;
 
 // End-to-end test: prove then verify. Uses RISC0_DEV_MODE.
 // This test exercises the CLI with real network calls unless tx/proof are provided.
 // To keep it fast we rely on dev mode proving which does not produce valid proofs outside of dev mode.
+
+static RISC0_DEV_MODE_LOCK: Mutex<()> = Mutex::new(());
 
 fn prove_then_verify(
     message: &str,
@@ -67,6 +74,55 @@ fn prove_then_verify(
         .stdout(predicate::str::contains(format!(
             "OG Status: {expected_og_status}"
         )));
+}
+
+#[test]
+fn verify_rejects_fake_genesis_root_proof() {
+    let mut merkle_block: MerkleBlock =
+        consensus::encode::deserialize(&hex::decode(P2PKH_SPV_PROOF).unwrap()).unwrap();
+    merkle_block.header.time = 1231006505;
+    let fake_block_inclusion_root = merkle_block.header.block_hash().to_byte_array();
+    let fake_spv_proof = hex::encode(consensus::encode::serialize(&merkle_block));
+    let mut fake_header_proof = Vec::with_capacity(8);
+    fake_header_proof.extend_from_slice(&0u32.to_le_bytes());
+    fake_header_proof.extend_from_slice(&1u32.to_le_bytes());
+
+    let input = (
+        P2PKH_MESSAGE.to_string(),
+        BASE64_STANDARD.decode(P2PKH_SIGNATURE).unwrap(),
+        og_zkp_core::AddressKind::P2pkh as i32,
+        P2PKH_TRANSACTION.to_string(),
+        fake_spv_proof,
+        fake_header_proof,
+        fake_block_inclusion_root,
+    );
+    let env = ExecutorEnv::builder()
+        .write(&input)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    let _guard = RISC0_DEV_MODE_LOCK.lock().unwrap();
+    let previous_dev_mode = env::var_os("RISC0_DEV_MODE");
+    env::set_var("RISC0_DEV_MODE", "1");
+    let receipt = default_prover()
+        .prove_with_opts(env, methods::OG_ZKP_ELF, &ProverOpts::groth16())
+        .unwrap()
+        .receipt;
+    if let Some(value) = previous_dev_mode {
+        env::set_var("RISC0_DEV_MODE", value);
+    } else {
+        env::remove_var("RISC0_DEV_MODE");
+    }
+
+    let serialized_receipt = og_zkp_core::receipt::serialize_receipt(&receipt).unwrap();
+
+    Command::cargo_bin("og-zkp")
+        .unwrap()
+        .env("RISC0_DEV_MODE", "1")
+        .args(["verify", &serialized_receipt])
+        .assert()
+        .failure();
 }
 
 #[test]
