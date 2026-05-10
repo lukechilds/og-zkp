@@ -6,10 +6,6 @@ jobs:
   precache:
     runs-on: ubuntu-latest
     steps:
-      - &free-disk
-        name: Free disk space
-        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
-
       - &checkout
         name: Checkout
         uses: actions/checkout@v4
@@ -24,29 +20,11 @@ jobs:
           key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-deps-
 
-      - &cargo-target-cache
-        name: Cache Cargo targets
-        uses: actions/cache@v4
-        with:
-          path: |
-            target
-            methods/guest/target
-          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/*', '!web/**', '!**/README.md', '!media/**', '!.git/**') }}
-          restore-keys: ${{ runner.os }}-cargo-target-
+      - name: Fetch root workspace dependencies
+        run: cargo fetch --locked
 
-      - &install-risc0
-        name: Install RISC Zero toolchain (rzup)
-        run: |
-          curl -L https://risczero.com/install | bash
-          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-          ~/.risc0/bin/rzup install rust 1.88.0
-          ~/.risc0/bin/rzup install cpp 2024.1.5
-
-      - name: Compile root workspace
-        run: cargo build --workspace --all-targets --all-features
-
-      - name: Compile guest workspace
-        run: cargo build --manifest-path methods/guest/Cargo.toml --all-targets --all-features
+      - name: Fetch guest dependencies
+        run: cargo fetch --manifest-path methods/guest/Cargo.toml --locked
 
   fmt:
     runs-on: ubuntu-latest
@@ -63,15 +41,21 @@ jobs:
     runs-on: ubuntu-latest
     needs: precache
     steps:
-      - *free-disk
+      - &free-disk
+        name: Free disk space
+        run: sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
 
       - *checkout
 
       - *cargo-deps-cache
 
-      - *cargo-target-cache
-
-      - *install-risc0
+      - &install-risc0
+        name: Install RISC Zero toolchain (rzup)
+        run: |
+          curl -L https://risczero.com/install | bash
+          echo "$HOME/.risc0/bin" >> $GITHUB_PATH
+          ~/.risc0/bin/rzup install rust 1.88.0
+          ~/.risc0/bin/rzup install cpp 2024.1.5
 
       - name: Run root workspace clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -89,8 +73,6 @@ jobs:
 
       - *cargo-deps-cache
 
-      - *cargo-target-cache
-
       - *install-risc0
 
       - name: Run unit tests
@@ -105,8 +87,6 @@ jobs:
       - *checkout
 
       - *cargo-deps-cache
-
-      - *cargo-target-cache
 
       - *install-risc0
 
@@ -125,8 +105,6 @@ jobs:
       - *checkout
 
       - *cargo-deps-cache
-
-      - *cargo-target-cache
 
       - *install-risc0
 
