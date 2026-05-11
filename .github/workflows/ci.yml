@@ -2,6 +2,10 @@ name: CI
 
 on: push
 
+env:
+  RISC0_RUST_VERSION: "1.88.0"
+  RISC0_CPP_VERSION: "2024.1.5"
+
 jobs:
   fmt:
     runs-on: ubuntu-latest
@@ -9,6 +13,17 @@ jobs:
       - &checkout
         name: Checkout
         uses: actions/checkout@v4
+
+      - &rustup-cache
+        name: Cache Rust toolchain
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.rustup/toolchains
+            ~/.rustup/update-hashes
+            ~/.rustup/settings.toml
+          key: ${{ runner.os }}-rustup-${{ hashFiles('rust-toolchain.toml') }}
+          restore-keys: ${{ runner.os }}-rustup-
 
       - name: Check root workspace formatting
         run: cargo fmt --all -- --check
@@ -25,23 +40,37 @@ jobs:
 
       - *checkout
 
-      - &cargo-deps-cache
-        name: Cache Cargo dependencies
+      - *rustup-cache
+
+      - &risc0-cache
+        name: Cache RISC Zero toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.risc0
+          key: ${{ runner.os }}-risc0-rust-${{ env.RISC0_RUST_VERSION }}-cpp-${{ env.RISC0_CPP_VERSION }}
+          restore-keys: ${{ runner.os }}-risc0-
+
+      - &cargo-cache
+        name: Cache Cargo
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-cargo-deps-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-deps-
+            target
+            methods/guest/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml', 'rust-toolchain.toml') }}
+          restore-keys: ${{ runner.os }}-cargo-
 
       - &install-risc0
         name: Install RISC Zero toolchain (rzup)
         run: |
-          curl -L https://risczero.com/install | bash
+          if [ ! -x "$HOME/.risc0/bin/rzup" ]; then
+            curl -L https://risczero.com/install | bash
+          fi
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
-          ~/.risc0/bin/rzup install rust 1.88.0
-          ~/.risc0/bin/rzup install cpp 2024.1.5
+          ~/.risc0/bin/rzup install rust "$RISC0_RUST_VERSION"
+          ~/.risc0/bin/rzup install cpp "$RISC0_CPP_VERSION"
 
       - name: Run root workspace clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -56,7 +85,11 @@ jobs:
 
       - *checkout
 
-      - *cargo-deps-cache
+      - *rustup-cache
+
+      - *risc0-cache
+
+      - *cargo-cache
 
       - *install-risc0
 
@@ -70,7 +103,11 @@ jobs:
 
       - *checkout
 
-      - *cargo-deps-cache
+      - *rustup-cache
+
+      - *risc0-cache
+
+      - *cargo-cache
 
       - *install-risc0
 
@@ -87,7 +124,11 @@ jobs:
 
       - *checkout
 
-      - *cargo-deps-cache
+      - *rustup-cache
+
+      - *risc0-cache
+
+      - *cargo-cache
 
       - *install-risc0
 
