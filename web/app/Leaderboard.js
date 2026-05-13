@@ -54,7 +54,12 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
 
   return (
     <>
-      <h2 className="leaderboard-title">leaderboard</h2>
+      <h2 className="leaderboard-title">
+        <span>leaderboard</span>
+        <span className="mobile-rank-info">
+          rank <RankInfoButton />
+        </span>
+      </h2>
       {total === 0 ? (
         <p className="empty">{query ? 'no results' : 'no verified proofs yet'}</p>
       ) : (
@@ -72,9 +77,14 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
           <tbody>
             {proofs.map((p, i) => {
               const rank = Number(p.rank);
+              const age = formatAge(p.block_month);
+              const proofHref = `/proof/${p.proof_id}`;
               return (
                 <tr key={p.proof_id}>
-                  <td className="rank">{String(rank).padStart(2, '0')}</td>
+                  <td className="rank">
+                    <Link className="mobile-row-link" href={proofHref} aria-label={`view proof ${rank}`} />
+                    {String(rank).padStart(2, '0')}
+                  </td>
                   <td className="crown-cell">
                     {rank === 1 && (
                       <svg className="crown" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,7 +94,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
                     )}
                   </td>
                   <td className="identity">
-                    <Link href={`/proof/${p.proof_id}`}>
+                    <Link href={proofHref}>
                       {p.identity_type === 'nostr'
                         ? <NostrName npub={p.identity} nip05={p.nip05} />
                         : p.identity.replace(/^x\.com\//, '@')}
@@ -96,8 +106,11 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
                     </svg>
                   </td>
                   <td className="tier"><RankBadge rank={getRank(p.block_month)} /></td>
-                  <td className="month">{formatMonth(p.block_month)}</td>
-                  <td className="age">{formatAge(p.block_month)}</td>
+                  <td className="month">
+                    {formatMonth(p.block_month)}
+                    <span className="mobile-age"> - {age}</span>
+                  </td>
+                  <td className="age">{age}</td>
                 </tr>
               );
             })}

@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import RankModal from './RankModal';
 
 export default function RankBadge({ rank }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -15,7 +21,10 @@ export default function RankBadge({ rank }) {
         {rank}
       </span>
 
-      {open && <RankModal activeRank={rank} onClose={() => setOpen(false)} />}
+      {open && mounted && createPortal(
+        <RankModal activeRank={rank} onClose={() => setOpen(false)} />,
+        document.body
+      )}
     </>
   );
 }

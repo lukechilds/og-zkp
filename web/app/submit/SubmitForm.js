@@ -227,10 +227,10 @@ export default function SubmitForm({ onSuccess }) {
 
       <form onSubmit={handleSubmit}>
         <label htmlFor="proof">
-          paste your proof string
+          <span>paste your proof string</span>
           {!showGuide && (
             <>
-              {' '}&mdash;{' '}
+              <span className="label-separator"> &mdash; </span>
               <button
                 type="button"
                 className="inline-link"
