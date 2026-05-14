@@ -40,10 +40,10 @@ fn prove_then_verify_lookup(
         .assert()
         .success()
         .stdout(predicate::str::contains(format!(
-            "Identity:  {expected_identity}"
+            "Identity:    {expected_identity}"
         )))
         .stdout(predicate::str::contains(format!(
-            "OG Status: {expected_og_status}"
+            "OG Status:   {expected_og_status}"
         )));
 }
 

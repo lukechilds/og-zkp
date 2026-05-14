@@ -313,8 +313,8 @@ fn docker_image_prove_then_verify_dev_mode() {
         .args(["verify", receipt]);
     let verify_output = command_output(&mut verify, "docker verify");
     let verify_stdout = String::from_utf8(verify_output.stdout).expect("utf8 verify stdout");
-    assert!(verify_stdout.contains("OG Status: October 2018"));
-    assert!(verify_stdout.contains("Identity:  x.com/lukechilds"));
+    assert!(verify_stdout.contains("OG Status:   October 2018"));
+    assert!(verify_stdout.contains("Identity:    x.com/lukechilds"));
     assert!(verify_stdout.contains("Proof is valid"));
 }
 
