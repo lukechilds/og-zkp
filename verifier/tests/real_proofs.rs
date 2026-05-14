@@ -15,6 +15,7 @@ struct Fixture {
     name: &'static str,
     proof: &'static str,
     block_month: &'static str,
+    attestation_url: &'static str,
 }
 
 const FIXTURES: &[Fixture] = &[
@@ -22,21 +23,25 @@ const FIXTURES: &[Fixture] = &[
         name: "p2pkh",
         proof: P2PKH_PROOF,
         block_month: "1538352000",
+        attestation_url: "https://og-zkp.com/proof/e5447768835a8c7c3daa29d97ea46394",
     },
     Fixture {
         name: "p2sh-p2wpkh",
         proof: P2SH_P2WPKH_PROOF,
         block_month: "1551398400",
+        attestation_url: "https://og-zkp.com/proof/46ec38de31cb157c0426943a8a7d3488",
     },
     Fixture {
         name: "p2wpkh",
         proof: P2WPKH_PROOF,
         block_month: "1551398400",
+        attestation_url: "https://og-zkp.com/proof/ac26a4829fe5b6dc1a582853ad1230ae",
     },
     Fixture {
         name: "p2tr",
         proof: P2TR_PROOF,
         block_month: "1740787200",
+        attestation_url: "https://og-zkp.com/proof/47d862136bc6bcfea34c0b27402d7962",
     },
 ];
 
@@ -62,6 +67,7 @@ fn verifies_real_proof_fixtures() {
         assert_eq!(json["block_inclusion_root"], BLOCK_INCLUSION_ROOT, "{name}");
         assert_eq!(json["block_month"], fixture.block_month, "{name}");
         assert_eq!(json["identity"], IDENTITY, "{name}");
+        assert_eq!(json["attestation_url"], fixture.attestation_url, "{name}");
         assert!(json.get("error").is_none(), "{name}");
     }
 }

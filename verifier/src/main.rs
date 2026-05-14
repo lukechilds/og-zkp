@@ -21,6 +21,7 @@ fn main() {
                 "block_inclusion_root": result.block_inclusion_root,
                 "block_month": result.block_month,
                 "identity": result.identity,
+                "attestation_url": result.attestation_url,
             });
             println!("{output}");
         }

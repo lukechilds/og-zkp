@@ -63,6 +63,13 @@ fn command_output(command: &mut Command, label: &str) -> Output {
     output
 }
 
+fn attestation_url(receipt: &str) -> String {
+    let mut id =
+        hex::encode(bitcoin::hashes::sha256::Hash::hash(receipt.as_bytes()).to_byte_array());
+    id.truncate(32);
+    format!("https://og-zkp.com/proof/{id}")
+}
+
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -109,6 +116,7 @@ fn prove_then_verify(
         .trim()
         .to_string();
     assert!(receipt.starts_with("og-zkp1"));
+    let expected_attestation_url = attestation_url(&receipt);
 
     // Verify the receipt
     let mut verify_cmd = Command::cargo_bin("og-zkp").expect("binary exists");
@@ -120,10 +128,13 @@ fn prove_then_verify(
         .success()
         // Check for expected identity and OG status in output
         .stdout(predicate::str::contains(format!(
-            "Identity:  {expected_identity}"
+            "Identity:    {expected_identity}"
         )))
         .stdout(predicate::str::contains(format!(
-            "OG Status: {expected_og_status}"
+            "OG Status:   {expected_og_status}"
+        )))
+        .stdout(predicate::str::contains(format!(
+            "Attestation: {expected_attestation_url}"
         )));
 }
 
@@ -469,6 +480,7 @@ fn verify_json_output() {
     assert!(json["block_inclusion_root"].is_string());
     assert_eq!(json["block_month"], "1538352000");
     assert_eq!(json["identity"], "x.com/lukechilds");
+    assert_eq!(json["attestation_url"], attestation_url(receipt));
     assert!(
         json.get("proof").is_none(),
         "verify should not include proof field"
