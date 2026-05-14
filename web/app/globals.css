@@ -583,6 +583,14 @@ button {
   margin: 0;
 }
 
+.code-block-nowrap pre {
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  padding-right: 3.75rem;
+}
+
 .copy-btn {
   position: absolute;
   top: 0.35rem;
@@ -596,6 +604,10 @@ button {
   margin: 0;
 }
 .copy-btn:hover { color: var(--text-dim); border-color: var(--text-muted); }
+
+.local-verify {
+  margin-top: 1rem;
+}
 
 /* Attestation display */
 .attestation-link {

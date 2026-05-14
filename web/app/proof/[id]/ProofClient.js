@@ -19,11 +19,16 @@ function CopyButton({ text }) {
   );
 }
 
+function shellQuote(value) {
+  return `"${value.replace(/(["\\$`])/g, '\\$1')}"`;
+}
+
 export default function ProofClient({ proof }) {
   const router = useRouter();
   const isVerified = proof.status === 'verified';
   const pageUrl = `https://og-zkp.com/proof/${proof.proof_id}`;
   const attestString = `I'm verifying myself on og-zkp\n\n${pageUrl}`;
+  const verifyCommand = `docker run --rm ghcr.io/lukechilds/og-zkp-verifier ${shellQuote(proof.proof)}`;
   const isX = proof.identity_type === 'x';
 
   return (
@@ -49,6 +54,13 @@ export default function ProofClient({ proof }) {
         <div className="code-block">
           <pre>{proof.proof}</pre>
           <CopyButton text={proof.proof} />
+        </div>
+        <div className="local-verify">
+          <div className="field-label">verify locally</div>
+          <div className="code-block code-block-nowrap">
+            <pre>{verifyCommand}</pre>
+            <CopyButton text={verifyCommand} />
+          </div>
         </div>
       </div>
     </>
