@@ -31,6 +31,13 @@ async function migrate() {
   try {
     await db.execute(`ALTER TABLE proofs ADD COLUMN nip05 TEXT`);
   } catch {}
+  try {
+    await db.execute(`ALTER TABLE proofs ADD COLUMN nip05_checked_at INTEGER`);
+  } catch {}
+  await db.execute(`
+    CREATE INDEX IF NOT EXISTS idx_proofs_nip05_queue
+    ON proofs (identity_type, status, nip05_checked_at)
+  `);
 }
 
 module.exports = { getDb, migrate };
