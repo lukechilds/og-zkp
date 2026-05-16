@@ -499,6 +499,10 @@ button {
   top: -0.15rem;
 }
 
+.proof-mobile-age {
+  display: none;
+}
+
 .field { margin-bottom: 1rem; }
 .field:last-child { margin-bottom: 0; }
 
@@ -885,6 +889,15 @@ button {
   .proof-value {
     top: 0;
     font-size: 0.8rem;
+  }
+
+  .proof-mobile-age {
+    display: inline;
+    color: var(--text-muted);
+  }
+
+  .proof-table tr.proof-age-row {
+    display: none;
   }
 
   .field-sub-label {

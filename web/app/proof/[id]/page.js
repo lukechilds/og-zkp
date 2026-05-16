@@ -75,9 +75,12 @@ export default async function ProofPage({ params }) {
             </tr>
             <tr>
               <td className="proof-label">bitcoiner since</td>
-              <td className="proof-value">{month}</td>
+              <td className="proof-value">
+                {month}
+                <span className="proof-mobile-age"> - {age}</span>
+              </td>
             </tr>
-            <tr>
+            <tr className="proof-age-row">
               <td className="proof-label">age</td>
               <td className="proof-value">{age}</td>
             </tr>
