@@ -220,7 +220,7 @@ export default function SubmitForm({ onSuccess }) {
         throw new Error(data.error || 'submission failed');
       }
       if (onSuccess) onSuccess();
-      router.push('/proof/' + data.proof_id);
+      router.push(`/proof/${data.proof_id}?cache=${Date.now()}`);
     } catch (err) {
       setError(err.message.toLowerCase());
       setSubmitting(false);

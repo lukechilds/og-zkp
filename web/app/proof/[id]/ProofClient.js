@@ -44,7 +44,7 @@ export default function ProofClient({ proof }) {
           isX={isX}
           attestString={attestString}
           pageUrl={pageUrl}
-          onVerified={() => router.refresh()}
+          onVerified={() => router.replace(`/proof/${proof.proof_id}?cache=${Date.now()}`)}
         />
       )}
 
