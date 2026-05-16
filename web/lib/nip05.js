@@ -1,4 +1,4 @@
-const { bech32 } = require("bech32");
+const { decode } = require("nostr-tools/nip19");
 const { SimplePool, useWebSocketImplementation } = require("nostr-tools/pool");
 const WebSocket = require("ws");
 
@@ -11,9 +11,9 @@ const RELAYS = [
 ];
 
 function npubToHex(npub) {
-  const { prefix, words } = bech32.decode(npub, 1000);
-  if (prefix !== "npub") throw new Error("Not an npub");
-  return Buffer.from(bech32.fromWords(words)).toString("hex");
+  const decoded = decode(npub);
+  if (decoded.type !== "npub") throw new Error("Not an npub");
+  return decoded.data;
 }
 
 async function verifyNip05(nip05, hex) {

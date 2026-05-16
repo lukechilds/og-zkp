@@ -1,6 +1,9 @@
-const { schnorr } = require("@noble/curves/secp256k1");
-const { bech32 } = require("bech32");
+const { decode } = require("nostr-tools/nip19");
+const { verifyEvent } = require("nostr-tools/pure");
+const { SimplePool, useWebSocketImplementation } = require("nostr-tools/pool");
 const WebSocket = require("ws");
+
+useWebSocketImplementation(WebSocket);
 
 function getIdentityType(identity) {
   if (identity.startsWith("x.com/")) return "x";
@@ -57,96 +60,20 @@ async function verifyXAttestation(proof, url) {
 // --- Nostr attestation ---
 
 function decodeNpub(npub) {
-  const { prefix, words } = bech32.decode(npub, 1000);
-  if (prefix !== "npub") throw new Error("Not an npub");
-  return Buffer.from(bech32.fromWords(words));
+  const decoded = decode(npub);
+  if (decoded.type !== "npub") throw new Error("Not an npub");
+  return decoded.data;
 }
 
-function decodeNote(note) {
-  const { prefix, words } = bech32.decode(note, 1000);
-  if (prefix !== "note") throw new Error("Not a note ID");
-  return Buffer.from(bech32.fromWords(words));
-}
-
-function decodeNevent(nevent) {
-  const { prefix, words } = bech32.decode(nevent, 1000);
-  if (prefix !== "nevent") throw new Error("Not an nevent");
-  const data = Buffer.from(bech32.fromWords(words));
-  // TLV format: type (1 byte) + length (1 byte) + value
-  // Type 0 = event id (32 bytes), Type 1 = relay URL (string)
-  let eventId = null;
-  const relays = [];
-  let i = 0;
-  while (i < data.length) {
-    const type = data[i];
-    const len = data[i + 1];
-    const value = data.slice(i + 2, i + 2 + len);
-    if (type === 0 && len === 32) {
-      eventId = value;
-    } else if (type === 1) {
-      relays.push(value.toString("utf8"));
-    }
-    i += 2 + len;
+async function fetchNostrEvent(eventIdHex, relays) {
+  const pool = new SimplePool();
+  try {
+    const event = await pool.get(relays, { ids: [eventIdHex] }, { maxWait: 10000 });
+    if (!event) throw new Error("Timeout fetching Nostr event");
+    return event;
+  } finally {
+    pool.close(relays);
   }
-  if (!eventId) throw new Error("No event ID found in nevent");
-  return { eventId, relays };
-}
-
-function fetchNostrEvent(eventIdHex, relays) {
-  return new Promise((resolve, reject) => {
-    let resolved = false;
-    const sockets = [];
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        sockets.forEach((ws) => ws.close());
-        reject(new Error("Timeout fetching Nostr event"));
-      }
-    }, 10000);
-
-    for (const relay of relays) {
-      try {
-        const ws = new WebSocket(relay);
-        sockets.push(ws);
-        const subId = Math.random().toString(36).slice(2);
-
-        ws.on("open", () => {
-          ws.send(JSON.stringify(["REQ", subId, { ids: [eventIdHex] }]));
-        });
-
-        ws.on("message", (data) => {
-          try {
-            const msg = JSON.parse(data.toString());
-            if (msg[0] === "EVENT" && msg[1] === subId && msg[2]) {
-              if (!resolved) {
-                resolved = true;
-                clearTimeout(timeout);
-                sockets.forEach((s) => s.close());
-                resolve(msg[2]);
-              }
-            }
-          } catch {}
-        });
-
-        ws.on("error", () => {});
-      } catch {}
-    }
-  });
-}
-
-function verifyNostrSignature(event) {
-  const serialized = JSON.stringify([
-    0,
-    event.pubkey,
-    event.created_at,
-    event.kind,
-    event.tags,
-    event.content,
-  ]);
-  const hash = Buffer.from(
-    require("crypto").createHash("sha256").update(serialized).digest()
-  );
-  return schnorr.verify(event.sig, hash, event.pubkey);
 }
 
 function validateNostrEvent(event, proof) {
@@ -155,9 +82,9 @@ function validateNostrEvent(event, proof) {
   const identity = proof.identity;
   if (!identity.startsWith("npub")) throw new Error("Identity is not a Nostr npub");
 
-  const expectedPubkey = decodeNpub(identity).toString("hex");
+  const expectedPubkey = decodeNpub(identity);
 
-  if (!verifyNostrSignature(event)) {
+  if (!verifyEvent(event)) {
     throw new Error("Invalid Nostr event signature");
   }
 
@@ -194,20 +121,12 @@ async function verifyNostrAttestation(proof, url) {
     return JSON.stringify(rawEvent);
   }
 
-  // Otherwise parse note1/nevent1 reference and fetch from relays
-  const neventMatch = url.match(/nevent1[a-z0-9]+/);
-  const noteMatch = url.match(/note1[a-z0-9]+/);
-  if (!neventMatch && !noteMatch) throw new Error("Invalid Nostr attestation (expected nevent1..., note1..., or raw signed event JSON)");
+  const match = url.match(/(?:nevent1|note1)[a-z0-9]+/);
+  if (!match) throw new Error("Invalid Nostr attestation (expected nevent1..., note1..., or raw signed event JSON)");
 
-  let eventIdHex;
-  let hintRelays = [];
-  if (neventMatch) {
-    const decoded = decodeNevent(neventMatch[0]);
-    eventIdHex = decoded.eventId.toString("hex");
-    hintRelays = decoded.relays;
-  } else {
-    eventIdHex = decodeNote(noteMatch[0]).toString("hex");
-  }
+  const decoded = decode(match[0]);
+  const eventIdHex = decoded.type === "nevent" ? decoded.data.id : decoded.data;
+  const hintRelays = decoded.type === "nevent" ? decoded.data.relays || [] : [];
 
   const relays = [...new Set([...hintRelays, ...DEFAULT_RELAYS])];
 
@@ -219,16 +138,9 @@ async function verifyNostrAttestation(proof, url) {
 }
 
 function publishToRelays(event, relays) {
-  for (const relay of relays) {
-    try {
-      const ws = new WebSocket(relay);
-      ws.on("open", () => {
-        ws.send(JSON.stringify(["EVENT", event]));
-        setTimeout(() => ws.close(), 3000);
-      });
-      ws.on("error", () => {});
-    } catch {}
-  }
+  const pool = new SimplePool();
+  pool.publish(relays, event, { maxWait: 3000 }).forEach((p) => p.catch(() => {}));
+  setTimeout(() => pool.close(relays), 3000);
 }
 
 const DEFAULT_RELAYS = [

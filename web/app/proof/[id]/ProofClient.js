@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { bech32 } from 'bech32';
+import { noteEncode } from 'nostr-tools/nip19';
 
 function CopyButton({ text }) {
   const [label, setLabel] = useState('copy');
@@ -77,10 +77,7 @@ function nostrNjumpUrl(url) {
   try {
     const event = JSON.parse(url);
     if (event.id) {
-      const bytes = event.id.match(/.{2}/g).map(b => parseInt(b, 16));
-      const words = bech32.toWords(new Uint8Array(bytes));
-      const note = bech32.encode('note', words, 1000);
-      return `https://njump.me/${note}`;
+      return `https://njump.me/${noteEncode(event.id)}`;
     }
   } catch {}
 

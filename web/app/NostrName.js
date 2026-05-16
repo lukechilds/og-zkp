@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { bech32 } from 'bech32';
+import { decode } from 'nostr-tools/nip19';
+import { SimplePool } from 'nostr-tools/pool';
 
 const RELAYS = [
   'wss://relay.damus.io',
@@ -12,9 +13,9 @@ const RELAYS = [
 const cache = new Map();
 
 function npubToHex(npub) {
-  const { words } = bech32.decode(npub, 1000);
-  const bytes = bech32.fromWords(words);
-  return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  const decoded = decode(npub);
+  if (decoded.type !== 'npub') throw new Error('not an npub');
+  return decoded.data;
 }
 
 export default function NostrName({ npub, nip05, short: showShort = true }) {
@@ -23,41 +24,26 @@ export default function NostrName({ npub, nip05, short: showShort = true }) {
   useEffect(() => {
     if (nip05 || !npub.startsWith('npub1') || cache.has(npub)) return;
 
-    let resolved = false;
+    let cancelled = false;
     let hex;
     try { hex = npubToHex(npub); } catch { return; }
-    const subId = Math.random().toString(36).slice(2, 10);
-    const sockets = [];
+    const pool = new SimplePool();
 
-    for (const url of RELAYS) {
-      try {
-        const ws = new WebSocket(url);
-        sockets.push(ws);
-        ws.onopen = () => {
-          ws.send(JSON.stringify(['REQ', subId, { kinds: [0], authors: [hex], limit: 1 }]));
-        };
-        ws.onmessage = (e) => {
-          try {
-            const msg = JSON.parse(e.data);
-            if (msg[0] === 'EVENT' && msg[2]?.content && !resolved) {
-              const meta = JSON.parse(msg[2].content);
-              if (meta.nip05) {
-                resolved = true;
-                const display = meta.nip05.startsWith('_@') ? meta.nip05.slice(2) : meta.nip05;
-                cache.set(npub, display);
-                setName(display);
-                sockets.forEach(s => s.close());
-              }
-            }
-          } catch {}
-        };
-      } catch {}
-    }
+    pool.get(RELAYS, { kinds: [0], authors: [hex], limit: 1 }, { maxWait: 5000 })
+      .then((event) => {
+        if (cancelled || !event?.content) return;
+        const meta = JSON.parse(event.content);
+        if (!meta.nip05) return;
+        const display = meta.nip05.startsWith('_@') ? meta.nip05.slice(2) : meta.nip05;
+        cache.set(npub, display);
+        setName(display);
+      })
+      .catch(() => {})
+      .finally(() => pool.close(RELAYS));
 
-    const timeout = setTimeout(() => sockets.forEach(s => s.close()), 5000);
     return () => {
-      clearTimeout(timeout);
-      sockets.forEach(s => s.close());
+      cancelled = true;
+      pool.close(RELAYS);
     };
   }, [npub]);
 
