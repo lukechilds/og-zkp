@@ -101,7 +101,7 @@ Inside the guest, every step is proven in zero-knowledge:
 
 5. **Verify block inclusion.** The block hash is checked against a Merkle tree of all known Bitcoin block hashes, proving the block is part of the real chain. The Merkle root is passed into the guest as input rather than compiled in, so the block hash set can be updated to include new blocks without changing the zkVM program hash or invalidating previous proofs. The root is committed to the proof output so the verifier can confirm which block set was used.
 
-6. **Collapse the timestamp to a calendar month.** The block header's timestamp is rounded down to the first second of its calendar month. This is what gets committed — not the exact block height or date.
+6. **Collapse the timestamp to a calendar month.** The block header's timestamp is rounded down to the first second of its calendar month. This is what gets committed, not the exact block height or date.
 
 7. **Commit the output.** The guest program outputs exactly three values: the block inclusion Merkle root, the calendar month timestamp, and the identity string.
 
