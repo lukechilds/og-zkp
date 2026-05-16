@@ -1,4 +1,5 @@
 import { JetBrains_Mono } from 'next/font/google';
+import Link from 'next/link';
 import { createHash } from 'crypto';
 import './globals.css';
 import Nav from './Nav';
@@ -48,7 +49,7 @@ export default function RootLayout({ children }) {
       <body>
         <div className="site">
           <header>
-            <a href="/" className="header-link" aria-label="og-zkp home">
+            <Link href="/" className="header-link" aria-label="og-zkp home">
               <div className="hash-header">
                 {hashes.map((hash, i) => (
                   i === MIDDLE ? (
@@ -68,7 +69,7 @@ export default function RootLayout({ children }) {
                   )
                 ))}
               </div>
-            </a>
+            </Link>
             <Nav />
           </header>
           <main>{children}</main>
