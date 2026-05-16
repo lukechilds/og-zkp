@@ -1,6 +1,7 @@
 const { getDb, migrate } = require('../../../../lib/db');
 const { getAllNip05s, verifyNip05 } = require('../../../../lib/nip05');
 
+// Vercel Hobby only allows daily cron schedules; keep web/vercel.json daily unless deploying on Pro.
 export async function GET(request) {
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
