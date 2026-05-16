@@ -503,6 +503,10 @@ button {
   display: none;
 }
 
+.proof-mobile-rank {
+  display: none;
+}
+
 .field { margin-bottom: 1rem; }
 .field:last-child { margin-bottom: 0; }
 
@@ -896,7 +900,21 @@ button {
     color: var(--text-muted);
   }
 
+  .proof-mobile-rank {
+    display: inline;
+    margin-right: 0.45rem;
+  }
+
+  .proof-mobile-rank .rank-badge {
+    font-size: 0.6rem;
+    vertical-align: 0.05rem;
+  }
+
   .proof-table tr.proof-age-row {
+    display: none;
+  }
+
+  .proof-table tr.proof-rank-row {
     display: none;
   }
 
