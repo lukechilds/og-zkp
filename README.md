@@ -85,7 +85,7 @@ docker run -it \
 
 ## How it works
 
-The prover is split into a host and a guest. The host runs outside the VM and gathers inputs. It looks up the address's first-seen transaction via mempool.space, fetches the raw transaction and SPV proof, and generates a Merkle proof against the compiled-in set of all Bitcoin block hashes. It then passes all of this into the [RISC Zero](https://risczero.com) zkVM guest program.
+The prover is split into a [host](core/src/prove.rs) and a [guest](core/src/guest.rs). The host runs outside the VM and gathers inputs. It looks up the address's first-seen transaction via mempool.space, fetches the raw transaction and SPV proof, and generates a Merkle proof against the compiled-in set of all Bitcoin block hashes. It then passes all of this into the [RISC Zero](https://risczero.com) zkVM guest program.
 
 You can also supply the raw transaction and SPV proof yourself (see [Airgap mode](#airgap-mode)), or point to a self-hosted mempool.space instance with `--mempool-api`.
 
