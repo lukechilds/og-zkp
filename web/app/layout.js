@@ -74,8 +74,6 @@ export default function RootLayout({ children }) {
           <main>{children}</main>
           <footer>
             <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">source code</a>
-            <span className="sep">-</span>
-            <a href="https://github.com/lukechilds/og-zkp/issues" target="_blank" rel="noopener">report a bug</a>
             <span className="credit">a thing by <a href="https://lu.ke" target="_blank" rel="noopener">@lukechilds</a></span>
           </footer>
         </div>
