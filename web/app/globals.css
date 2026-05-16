@@ -901,12 +901,15 @@ button {
 
   .proof-mobile-rank {
     display: inline;
-    margin-right: 0.45rem;
   }
 
   .proof-mobile-rank .rank-badge {
     font-size: 0.6rem;
     vertical-align: 0.05rem;
+  }
+
+  .proof-mobile-since {
+    color: var(--text-faint);
   }
 
   .proof-table tr.proof-age-row {

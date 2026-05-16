@@ -76,7 +76,7 @@ export default async function ProofPage({ params }) {
             <tr>
               <td className="proof-label">bitcoiner since</td>
               <td className="proof-value">
-                <span className="proof-mobile-rank"><RankBadge rank={rank} /></span>
+                <span className="proof-mobile-rank"><RankBadge rank={rank} /><span className="proof-mobile-since"> since </span></span>
                 {month}
                 <span className="proof-mobile-age"> - {age}</span>
               </td>
