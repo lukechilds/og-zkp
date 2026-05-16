@@ -16,6 +16,34 @@ const getProof = cache(async (id) => {
   return result.rows[0] || null;
 });
 
+const getLeaderboardRank = cache(async (id) => {
+  const db = getDb();
+  await migrate();
+
+  const dedup = `SELECT proof_id, identity, identity_type, block_month, nip05
+    FROM proofs p1
+    WHERE status = 'verified'
+    AND CAST(block_month AS INTEGER) = (
+      SELECT MIN(CAST(block_month AS INTEGER))
+      FROM proofs p2
+      WHERE p2.identity = p1.identity AND p2.status = 'verified'
+    )
+    AND p1.rowid = (
+      SELECT MIN(p3.rowid) FROM proofs p3
+      WHERE p3.identity = p1.identity AND p3.status = 'verified'
+      AND CAST(p3.block_month AS INTEGER) = CAST(p1.block_month AS INTEGER)
+    )`;
+
+  const result = await db.execute({
+    sql: `SELECT rank FROM (
+      SELECT proof_id, ROW_NUMBER() OVER (ORDER BY CAST(block_month AS INTEGER) ASC) as rank
+      FROM (${dedup})
+    ) WHERE proof_id = ?`,
+    args: [id],
+  });
+  return result.rows[0] ? Number(result.rows[0].rank) : null;
+});
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const proof = await getProof(id);
@@ -47,6 +75,8 @@ export default async function ProofPage({ params }) {
 
   const month = formatMonth(proof.block_month);
   const rank = getRank(proof.block_month);
+  const leaderboardRank = await getLeaderboardRank(id);
+  const leaderboardRankLabel = leaderboardRank ? `#${String(leaderboardRank).padStart(2, '0')}` : 'not listed';
   const age = formatAge(proof.block_month);
   const isVerified = proof.status === 'verified';
 
@@ -68,6 +98,10 @@ export default async function ProofPage({ params }) {
                   </div>
                 )}
               </td>
+            </tr>
+            <tr>
+              <td className="proof-label">leaderboard</td>
+              <td className="proof-value">{leaderboardRankLabel}</td>
             </tr>
             <tr className="proof-rank-row">
               <td className="proof-label">rank</td>
