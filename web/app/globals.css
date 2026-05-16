@@ -429,6 +429,18 @@ button {
 
 .error { color: var(--red); font-size: 0.75rem; margin-top: 0.75rem; }
 .success { color: var(--green); font-size: 0.75rem; margin-top: 0.75rem; }
+.warning { color: var(--amber); font-size: 0.65rem; }
+
+.label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.label-row .warning {
+  text-align: right;
+}
 
 .proof-guide {
   border-bottom: 1px solid var(--border);

@@ -66,6 +66,7 @@ function ProofGuide({ guideRef }) {
 
   const walletConfig = WALLETS[wallet];
   const identityValue = identity.trim() || '<identity>';
+  const identityWarning = identity.trim() && !identityValue.startsWith('x.com/') && !identityValue.startsWith('npub1');
   const addressValue = address.trim() || '<bitcoin-address>';
   const signatureValue = signature.trim() || '<signature-from-wallet>';
   const message = `og-zkp ${identityValue}`;
@@ -82,7 +83,12 @@ function ProofGuide({ guideRef }) {
       <div className="section-title">generate a proof</div>
       <div className="guide-fields">
         <div className="field">
-          <label htmlFor="proof-identity">identity</label>
+          <div className="label-row">
+            <label htmlFor="proof-identity">identity</label>
+            {identityWarning && (
+              <span className="warning">should start with x.com/ or npub1</span>
+            )}
+          </div>
           <input
             type="text"
             id="proof-identity"
