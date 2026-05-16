@@ -31,7 +31,7 @@ export default function Nav() {
             <ol>
               <li>generate a zero-knowledge proof that you owned bitcoin on a given date using the <a href="https://github.com/lukechilds/og-zkp" target="_blank" rel="noopener">og-zkp CLI</a></li>
               <li>submit your proof to the leaderboard</li>
-              <li>verify your identity by posting an attestation on X or nostr</li>
+              <li>verify your (real or throwaway) identity by posting an attestation on X or nostr</li>
               <li>get listed as a verified bitcoin og</li>
             </ol>
             <p>your address and exact date are kept private and never leave your computer. only the calendar month and identity are revealed.</p>
