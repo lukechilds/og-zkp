@@ -84,22 +84,41 @@ function nostrNjumpUrl(url) {
   return null;
 }
 
+function normalizedXPostUrl(input) {
+  try {
+    const value = input.trim();
+    const parsed = new URL(/^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`);
+    const hostname = parsed.hostname.toLowerCase();
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    if ((hostname !== 'x.com' && hostname !== 'twitter.com')
+      || parts.length !== 3
+      || parts[1] !== 'status'
+      || !/^[A-Za-z0-9_]{1,15}$/.test(parts[0])
+      || !/^\d+$/.test(parts[2])) {
+      return null;
+    }
+    return `https://x.com/${parts[0].toLowerCase()}/status/${parts[2]}`;
+  } catch {
+    return null;
+  }
+}
+
 function AttestationDisplay({ url, attestString }) {
-  const isXAttestation = url.match(/(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/);
-  const njumpUrl = !isXAttestation ? nostrNjumpUrl(url) : null;
+  const xUrl = normalizedXPostUrl(url);
+  const njumpUrl = !xUrl ? nostrNjumpUrl(url) : null;
   const formattedUrl = (() => { try { return JSON.stringify(JSON.parse(url), null, 2); } catch { return url; } })();
 
   return (
     <div className="section">
       <div className="section-title">attestation</div>
-      {isXAttestation ? (
+      {xUrl ? (
         <>
           <div className="code-block">
             <pre>{attestString}</pre>
             <CopyButton text={attestString} />
           </div>
           <div className="attestation-link" style={{ marginTop: '0.75rem' }}>
-            <a href={url} target="_blank" rel="noopener">{url}</a>
+            <a href={xUrl} target="_blank" rel="noopener">{xUrl}</a>
           </div>
         </>
       ) : (
