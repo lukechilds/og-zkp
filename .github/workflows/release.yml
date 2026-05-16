@@ -1,8 +1,8 @@
-name: Release
+name: Release CLI
 
 on:
   push:
-    tags: ['v*']
+    tags: ['cli-v*']
 
 permissions:
   contents: write

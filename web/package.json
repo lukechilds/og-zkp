@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "prepare-verifier": "node scripts/install-verifier.js",
+    "build": "npm run prepare-verifier && next build",
     "start": "next start"
   },
   "dependencies": {
