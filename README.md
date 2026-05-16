@@ -10,7 +10,7 @@ You can attest to a known identity, or a throwaway anonymous identity. The verif
 
 ![](media/demo.svg)
 
-A proof alone only shows that _someone_ with a particular Bitcoin key claims a given identity. You should also verify that the identity attests back to the same proof. [og-zkp.com](https://og-zkp.com) handles this with a Keybase-style identity verification system. After submitting a proof, you publish an attestation from the linked identity (a tweet or Nostr note), and [og-zkp.com](https://og-zkp.com) verifies that both directions match before marking the proof as verified.
+A proof shows that a Bitcoin key signed a claim about an identity, but not that the identity actually belongs to the person making the claim. [og-zkp.com](https://og-zkp.com) closes that loop by requiring the claimed identity to point back to the proof. After submitting, you publish a short attestation from that identity, such as a tweet or Nostr note, and [og-zkp.com](https://og-zkp.com) checks both sides before marking the proof as verified.
 
 [![](media/og-zkp.com.png)](https://og-zkp.com)
 
