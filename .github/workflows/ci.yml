@@ -39,6 +39,8 @@ jobs:
 
       - &install-risc0
         name: Install RISC Zero toolchain (rzup)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH

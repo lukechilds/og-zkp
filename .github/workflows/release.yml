@@ -19,6 +19,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install RISC Zero toolchain (rzup)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
@@ -62,6 +64,8 @@ jobs:
 
       - name: Install RISC Zero toolchain (rzup)
         if: matrix.target != 'aarch64-unknown-linux-gnu'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           curl -L https://risczero.com/install | bash
           echo "$HOME/.risc0/bin" >> $GITHUB_PATH
