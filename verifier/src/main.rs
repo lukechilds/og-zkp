@@ -1,3 +1,15 @@
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(name = "og-zkp-verifier", version, about = "og-zkp verifier CLI")]
+struct Cli {
+    /// Bech32m-encoded serialized receipt
+    proof: String,
+    /// Output result as JSON
+    #[arg(long)]
+    json: bool,
+}
+
 fn parse_image_id(hex_str: &str) -> [u32; 8] {
     let hex_str = hex_str.trim();
     assert!(hex_str.len() == 64, "image ID must be 64 hex chars");
@@ -9,29 +21,8 @@ fn parse_image_id(hex_str: &str) -> [u32; 8] {
     id
 }
 
-fn main() {
-    let proof = std::env::args()
-        .nth(1)
-        .expect("usage: og-zkp-verifier <proof>");
+fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
     let image_id = parse_image_id(include_str!("../../host/expected-image-id"));
-    match og_zkp_core::verify::verify_and_extract(&proof, image_id) {
-        Ok(result) => {
-            let output = serde_json::json!({
-                "valid": true,
-                "block_inclusion_root": result.block_inclusion_root,
-                "block_month": result.block_month,
-                "identity": result.identity,
-                "attestation_url": result.attestation_url,
-            });
-            println!("{output}");
-        }
-        Err(e) => {
-            let output = serde_json::json!({
-                "valid": false,
-                "error": e.to_string(),
-            });
-            println!("{output}");
-            std::process::exit(1);
-        }
-    }
+    og_zkp_core::verify::run(image_id, &cli.proof, cli.json)
 }

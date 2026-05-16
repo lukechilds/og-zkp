@@ -15,6 +15,7 @@ struct Fixture {
     name: &'static str,
     proof: &'static str,
     block_month: &'static str,
+    block_month_display: &'static str,
     attestation_url: &'static str,
 }
 
@@ -23,30 +24,34 @@ const FIXTURES: &[Fixture] = &[
         name: "p2pkh",
         proof: P2PKH_PROOF,
         block_month: "1538352000",
+        block_month_display: "October 2018",
         attestation_url: "https://og-zkp.com/proof/e5447768835a8c7c3daa29d97ea46394",
     },
     Fixture {
         name: "p2sh-p2wpkh",
         proof: P2SH_P2WPKH_PROOF,
         block_month: "1551398400",
+        block_month_display: "March 2019",
         attestation_url: "https://og-zkp.com/proof/46ec38de31cb157c0426943a8a7d3488",
     },
     Fixture {
         name: "p2wpkh",
         proof: P2WPKH_PROOF,
         block_month: "1551398400",
+        block_month_display: "March 2019",
         attestation_url: "https://og-zkp.com/proof/ac26a4829fe5b6dc1a582853ad1230ae",
     },
     Fixture {
         name: "p2tr",
         proof: P2TR_PROOF,
         block_month: "1740787200",
+        block_month_display: "March 2025",
         attestation_url: "https://og-zkp.com/proof/47d862136bc6bcfea34c0b27402d7962",
     },
 ];
 
 #[test]
-fn verifies_real_proof_fixtures() {
+fn verifies_real_proof_fixtures_with_text_output() {
     for fixture in FIXTURES {
         let output = Command::cargo_bin("og-zkp-verifier")
             .expect("verifier binary exists")
@@ -62,12 +67,37 @@ fn verifies_real_proof_fixtures() {
             "fixture {name} failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
         );
 
+        assert!(stdout.contains(&format!("OG Status:   {}", fixture.block_month_display)));
+        assert!(stdout.contains(&format!("Identity:    {IDENTITY}")));
+        assert!(stdout.contains(&format!("Attestation: {}", fixture.attestation_url)));
+        assert!(stdout.contains("Proof is valid"));
+    }
+}
+
+#[test]
+fn supports_json_output() {
+    for fixture in FIXTURES {
+        let output = Command::cargo_bin("og-zkp-verifier")
+            .expect("verifier binary exists")
+            .arg(fixture.proof.trim())
+            .arg("--json")
+            .output()
+            .expect("verifier runs");
+
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let name = fixture.name;
+        assert!(
+            output.status.success(),
+            "fixture {name} failed\nstdout:\n{stdout}\nstderr:\n{stderr}"
+        );
+
         let json: Value = serde_json::from_slice(&output.stdout).expect("stdout is valid JSON");
-        assert_eq!(json["valid"].as_bool(), Some(true), "{name}");
         assert_eq!(json["block_inclusion_root"], BLOCK_INCLUSION_ROOT, "{name}");
         assert_eq!(json["block_month"], fixture.block_month, "{name}");
         assert_eq!(json["identity"], IDENTITY, "{name}");
         assert_eq!(json["attestation_url"], fixture.attestation_url, "{name}");
+        assert!(json.get("valid").is_none(), "{name}");
         assert!(json.get("error").is_none(), "{name}");
     }
 }

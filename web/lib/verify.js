@@ -4,7 +4,7 @@ const path = require("path");
 function verify(proof) {
   return new Promise((resolve, reject) => {
     const bin = path.join(process.cwd(), "bin", "og-zkp-verifier");
-    execFile(bin, [proof], { timeout: 30000 }, (error, stdout) => {
+    execFile(bin, [proof, "--json"], { timeout: 30000 }, (error, stdout) => {
       if (error) {
         try {
           const result = JSON.parse(stdout);
