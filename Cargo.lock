@@ -2573,7 +2573,7 @@ dependencies = [
 
 [[package]]
 name = "og-zkp"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -2611,7 +2611,7 @@ dependencies = [
 
 [[package]]
 name = "og-zkp-verifier"
-version = "0.1.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
