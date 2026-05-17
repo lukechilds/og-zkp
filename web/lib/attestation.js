@@ -5,10 +5,22 @@ const WebSocket = require("ws");
 
 useWebSocketImplementation(WebSocket);
 
+const X_FETCH_TIMEOUT_MS = 10000;
+const NOSTR_FETCH_TIMEOUT_MS = 10000;
+const MAX_NOSTR_HINT_RELAYS = 5;
+
 function getIdentityType(identity) {
   if (identity.startsWith("x.com/")) return "x";
   if (identity.startsWith("npub")) return "nostr";
   return "unknown";
+}
+
+function withTimeout(promise, ms, message) {
+  let timeout;
+  const timer = new Promise((_, reject) => {
+    timeout = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timer]).finally(() => clearTimeout(timeout));
 }
 
 // --- X (Twitter) attestation ---
@@ -26,7 +38,10 @@ async function verifyXAttestation(proof, url) {
 
   const resp = await fetch(
     `https://api.x.com/2/tweets/${tweetId}?expansions=author_id&user.fields=username&tweet.fields=entities`,
-    { headers: { Authorization: `Bearer ${process.env.X_BEARER_TOKEN}` } }
+    {
+      headers: { Authorization: `Bearer ${process.env.X_BEARER_TOKEN}` },
+      signal: AbortSignal.timeout(X_FETCH_TIMEOUT_MS),
+    }
   );
   if (!resp.ok) throw new Error(`X API error: ${resp.status}`);
   const data = await resp.json();
@@ -68,12 +83,42 @@ function decodeNpub(npub) {
 async function fetchNostrEvent(eventIdHex, relays) {
   const pool = new SimplePool();
   try {
-    const event = await pool.get(relays, { ids: [eventIdHex] }, { maxWait: 10000 });
-    if (!event) throw new Error("Timeout fetching Nostr event");
+    const event = await withTimeout(
+      pool.get(relays, { ids: [eventIdHex] }, { maxWait: NOSTR_FETCH_TIMEOUT_MS }),
+      NOSTR_FETCH_TIMEOUT_MS + 1000,
+      "Timeout fetching Nostr event"
+    );
+    if (!event) throw new Error("Nostr event not found on supported relays");
     return event;
   } finally {
     pool.close(relays);
   }
+}
+
+function normalizeRelayUrl(relay) {
+  if (typeof relay !== "string") return null;
+
+  let value = relay.trim();
+  if (!value) return null;
+  if (!value.includes("://")) value = `wss://${value}`;
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "http:") url.protocol = "ws:";
+    if (url.protocol === "https:") url.protocol = "wss:";
+    if (url.protocol !== "ws:" && url.protocol !== "wss:") return null;
+    url.hash = "";
+    url.pathname = url.pathname.replace(/\/+/g, "/");
+    if (url.pathname.endsWith("/")) url.pathname = url.pathname.slice(0, -1);
+    url.searchParams.sort();
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function normalizeRelays(relays) {
+  return [...new Set(relays.map(normalizeRelayUrl).filter(Boolean))];
 }
 
 function validateNostrEvent(event, proof) {
@@ -117,7 +162,6 @@ async function verifyNostrAttestation(proof, url) {
   const rawEvent = tryParseRawEvent(url);
   if (rawEvent) {
     validateNostrEvent(rawEvent, proof);
-    publishToRelays(rawEvent, DEFAULT_RELAYS);
     return JSON.stringify(rawEvent);
   }
 
@@ -128,19 +172,15 @@ async function verifyNostrAttestation(proof, url) {
   const eventIdHex = decoded.type === "nevent" ? decoded.data.id : decoded.data;
   const hintRelays = decoded.type === "nevent" ? decoded.data.relays || [] : [];
 
-  const relays = [...new Set([...hintRelays, ...DEFAULT_RELAYS])];
+  const relays = normalizeRelays([
+    ...hintRelays.slice(0, MAX_NOSTR_HINT_RELAYS),
+    ...DEFAULT_RELAYS,
+  ]);
 
   const event = await fetchNostrEvent(eventIdHex, relays);
   validateNostrEvent(event, proof);
-  publishToRelays(event, DEFAULT_RELAYS);
 
   return JSON.stringify(event);
-}
-
-function publishToRelays(event, relays) {
-  const pool = new SimplePool();
-  pool.publish(relays, event, { maxWait: 3000 }).forEach((p) => p.catch(() => {}));
-  setTimeout(() => pool.close(relays), 3000);
 }
 
 const DEFAULT_RELAYS = [
