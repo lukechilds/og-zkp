@@ -419,7 +419,13 @@ button {
   text-align: center;
 }
 
-.btn-primary:hover { background: #e0e0e0; }
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus-visible,
+.btn-primary:visited {
+  background: #e0e0e0;
+  color: #000;
+}
 .btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
 
 .btn-link {
