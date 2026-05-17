@@ -10,13 +10,14 @@ export default function RankInfoButton() {
     <>
       <button
         type="button"
-        className="rank-info-button"
+        className="rank-info-trigger"
         aria-label="show rank details"
         aria-haspopup="dialog"
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        i
+        <span>rank</span>
+        <span className="rank-info-icon" aria-hidden="true">i</span>
       </button>
       {open && <RankModal onClose={() => setOpen(false)} />}
     </>

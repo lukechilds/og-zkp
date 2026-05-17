@@ -57,7 +57,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
       <h2 className="leaderboard-title">
         <span>leaderboard</span>
         <span className="mobile-rank-info">
-          rank <RankInfoButton />
+          <RankInfoButton />
         </span>
       </h2>
       {total === 0 ? (
@@ -69,7 +69,7 @@ export default async function Leaderboard({ query = '', currentPage = 1 }) {
               <th className="rank">#</th>
               <th className="crown-cell"></th>
               <th>identity</th>
-              <th><span className="rank-heading">rank <RankInfoButton /></span></th>
+              <th><RankInfoButton /></th>
               <th>bitcoiner since</th>
               <th>age</th>
             </tr>
