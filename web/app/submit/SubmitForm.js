@@ -12,6 +12,14 @@ const WALLETS = {
       'copy the signature printed by bitcoin-cli',
     ],
   },
+  electrum: {
+    label: 'electrum',
+    steps: [
+      'open the electrum wallet that controls the address you want to prove',
+      'open tools and choose sign/verify message, or right click the address and choose sign/verify message',
+      'paste the address and message below, sign it, then copy the signature',
+    ],
+  },
   sparrow: {
     label: 'sparrow',
     steps: [
