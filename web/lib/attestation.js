@@ -15,14 +15,6 @@ function getIdentityType(identity) {
   return "unknown";
 }
 
-function withTimeout(promise, ms, message) {
-  let timeout;
-  const timer = new Promise((_, reject) => {
-    timeout = setTimeout(() => reject(new Error(message)), ms);
-  });
-  return Promise.race([promise, timer]).finally(() => clearTimeout(timeout));
-}
-
 // --- X (Twitter) attestation ---
 
 async function verifyXAttestation(proof, url) {
@@ -80,19 +72,66 @@ function decodeNpub(npub) {
   return decoded.data;
 }
 
-async function fetchNostrEvent(eventIdHex, relays) {
-  const pool = new SimplePool();
-  try {
-    const event = await withTimeout(
-      pool.get(relays, { ids: [eventIdHex] }, { maxWait: NOSTR_FETCH_TIMEOUT_MS }),
-      NOSTR_FETCH_TIMEOUT_MS + 1000,
-      "Timeout fetching Nostr event"
-    );
-    if (!event) throw new Error("Nostr event not found on supported relays");
-    return event;
-  } finally {
-    pool.close(relays);
+function closeRelayPool(pool) {
+  // nostr-tools closes ws connections gracefully, which can keep API requests open.
+  for (const relay of pool.relays?.values?.() || []) {
+    relay.ws?.terminate?.();
   }
+  pool.destroy();
+}
+
+async function fetchNostrEvent(eventIdHex, relays, proof) {
+  const pool = new SimplePool();
+  const controller = new AbortController();
+  let sub;
+  let timeout;
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let sawEvent = false;
+    let lastValidationError;
+
+    function finish(fn, value) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      controller.abort();
+      sub?.close("attestation lookup complete");
+      closeRelayPool(pool);
+      fn(value);
+    }
+
+    function notFoundError() {
+      return sawEvent && lastValidationError
+        ? lastValidationError
+        : new Error("Nostr event not found on supported relays");
+    }
+
+    timeout = setTimeout(() => {
+      finish(reject, notFoundError());
+    }, NOSTR_FETCH_TIMEOUT_MS + 1000);
+
+    try {
+      sub = pool.subscribeEose(relays, { ids: [eventIdHex], limit: 1 }, {
+        maxWait: NOSTR_FETCH_TIMEOUT_MS,
+        abort: controller.signal,
+        onevent(event) {
+          sawEvent = true;
+          try {
+            validateNostrEvent(event, proof);
+            finish(resolve, event);
+          } catch (e) {
+            lastValidationError = e;
+          }
+        },
+        onclose() {
+          finish(reject, notFoundError());
+        },
+      });
+    } catch (e) {
+      finish(reject, e);
+    }
+  });
 }
 
 function normalizeRelayUrl(relay) {
@@ -177,8 +216,7 @@ async function verifyNostrAttestation(proof, url) {
     ...DEFAULT_RELAYS,
   ]);
 
-  const event = await fetchNostrEvent(eventIdHex, relays);
-  validateNostrEvent(event, proof);
+  const event = await fetchNostrEvent(eventIdHex, relays, proof);
 
   return JSON.stringify(event);
 }
