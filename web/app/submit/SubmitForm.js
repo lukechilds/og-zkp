@@ -82,8 +82,8 @@ function ProofGuide({ guideRef }) {
   const proveCommand = [
     'docker run -it ghcr.io/lukechilds/og-zkp prove \\',
     `  --message ${shellQuote(message)} \\`,
-    `  --signature ${shellQuote(signatureValue)} \\`,
-    `  --address ${shellQuote(addressValue)}`,
+    `  --address ${shellQuote(addressValue)} \\`,
+    `  --signature ${shellQuote(signatureValue)}`,
   ].join('\n');
 
   return (
