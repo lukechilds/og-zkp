@@ -1,4 +1,5 @@
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY og-zkp-verifier /usr/local/bin/og-zkp-verifier
+ARG TARGETARCH
+COPY og-zkp-verifier-${TARGETARCH} /usr/local/bin/og-zkp-verifier
 ENTRYPOINT ["og-zkp-verifier"]

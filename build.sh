@@ -133,9 +133,28 @@ cmd_docker() {
 
 cmd_docker_verifier() {
     local image="${VERIFIER_IMAGE:-ghcr.io/lukechilds/og-zkp-verifier:latest}"
-    cp "$DIST/og-zkp-verifier-x86_64-unknown-linux-gnu" "$ROOT/docker/og-zkp-verifier"
-    docker build --platform linux/amd64 -t "$image" -f "$ROOT/docker/Dockerfile.verifier" "$ROOT/docker/"
-    rm "$ROOT/docker/og-zkp-verifier"
+    local target="${1:-native}"
+    if [[ "$target" == "native" ]]; then
+        target="$(native_linux_target)"
+    else
+        target="$(docker_target "$target")"
+    fi
+
+    local arch platform src staged
+    arch="$(docker_arch "$target")"
+    platform="linux/$arch"
+    src="$DIST/og-zkp-verifier-$target"
+    staged="$ROOT/docker/og-zkp-verifier-$arch"
+
+    if [[ ! -f "$src" ]]; then
+        echo "Error: missing $src" >&2
+        echo "Run: ./build.sh verifier $target" >&2
+        exit 1
+    fi
+
+    cp "$src" "$staged"
+    trap 'rm -f "$staged"; trap - RETURN' RETURN
+    docker build --platform "$platform" -t "$image" -f "$ROOT/docker/Dockerfile.verifier" "$ROOT/docker/"
 }
 
 cmd_checksums() {
@@ -239,7 +258,7 @@ case "${1:-}" in
     release)          cmd_release ;;
     clean)            cmd_clean ;;
     *)
-        echo "Usage: $0 {guest|host [target]|verifier [target]|docker [target|native]|docker-verifier|checksums|blockhashes|release|clean}"
+        echo "Usage: $0 {guest|host [target]|verifier [target]|docker [target|native]|docker-verifier [target|native]|checksums|blockhashes|release|clean}"
         exit 1
         ;;
 esac
