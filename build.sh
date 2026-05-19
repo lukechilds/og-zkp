@@ -34,6 +34,22 @@ docker_arch() {
     esac
 }
 
+docker_target() {
+    case "$1" in
+        amd64|linux/amd64) echo x86_64-unknown-linux-gnu ;;
+        arm64|linux/arm64) echo aarch64-unknown-linux-gnu ;;
+        *)                 echo "$1" ;;
+    esac
+}
+
+native_linux_target() {
+    case "$HOST_ARCH" in
+        x86_64)  echo x86_64-unknown-linux-gnu ;;
+        aarch64) echo aarch64-unknown-linux-gnu ;;
+        *)       echo "Unsupported host architecture for Docker: $HOST_ARCH" >&2; exit 1 ;;
+    esac
+}
+
 is_native() {
     local t_os t_arch
     t_os="$(target_os "$1")"
@@ -91,9 +107,28 @@ cmd_verifier() {
 }
 
 cmd_docker() {
-    cp "$DIST/og-zkp-x86_64-unknown-linux-gnu" "$ROOT/docker/og-zkp"
-    docker build --platform linux/amd64 -t "$IMAGE" "$ROOT/docker/"
-    rm "$ROOT/docker/og-zkp"
+    local target="${1:-native}"
+    if [[ "$target" == "native" ]]; then
+        target="$(native_linux_target)"
+    else
+        target="$(docker_target "$target")"
+    fi
+
+    local arch platform src staged
+    arch="$(docker_arch "$target")"
+    platform="linux/$arch"
+    src="$DIST/og-zkp-$target"
+    staged="$ROOT/docker/og-zkp-$arch"
+
+    if [[ ! -f "$src" ]]; then
+        echo "Error: missing $src" >&2
+        echo "Run: ./build.sh host $target" >&2
+        exit 1
+    fi
+
+    cp "$src" "$staged"
+    trap 'rm -f "$staged"; trap - RETURN' RETURN
+    docker build --platform "$platform" -t "$IMAGE" "$ROOT/docker/"
 }
 
 cmd_docker_verifier() {
@@ -204,7 +239,7 @@ case "${1:-}" in
     release)          cmd_release ;;
     clean)            cmd_clean ;;
     *)
-        echo "Usage: $0 {guest|host [target]|verifier [target]|docker|docker-verifier|checksums|blockhashes|release|clean}"
+        echo "Usage: $0 {guest|host [target]|verifier [target]|docker [target|native]|docker-verifier|checksums|blockhashes|release|clean}"
         exit 1
         ;;
 esac
