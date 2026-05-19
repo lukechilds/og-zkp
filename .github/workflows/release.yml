@@ -122,19 +122,28 @@ jobs:
 
   docker:
     needs: build
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            arch: amd64
+            os: ubuntu-24.04
+          - target: aarch64-unknown-linux-gnu
+            arch: arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download linux amd64 binary
+      - name: Download linux binary
         uses: actions/download-artifact@v4
         with:
-          name: og-zkp-x86_64-unknown-linux-gnu
+          name: og-zkp-${{ matrix.target }}
           path: dist/
 
       - name: Prepare binary
-        run: chmod +x dist/og-zkp-x86_64-unknown-linux-gnu
+        run: chmod +x dist/og-zkp-${{ matrix.target }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -144,30 +153,66 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image
-        run: ./build.sh docker
+        run: ./build.sh docker ${{ matrix.target }}
 
       - name: Push Docker image
         run: |
           version="${GITHUB_REF_NAME#cli-}"
-          docker tag ghcr.io/lukechilds/og-zkp:latest ghcr.io/lukechilds/og-zkp:$version
-          docker push ghcr.io/lukechilds/og-zkp:$version
-          docker push ghcr.io/lukechilds/og-zkp:latest
+          docker tag ghcr.io/lukechilds/og-zkp:latest ghcr.io/lukechilds/og-zkp:${version}-${{ matrix.arch }}
+          docker tag ghcr.io/lukechilds/og-zkp:latest ghcr.io/lukechilds/og-zkp:latest-${{ matrix.arch }}
+          docker push ghcr.io/lukechilds/og-zkp:${version}-${{ matrix.arch }}
+          docker push ghcr.io/lukechilds/og-zkp:latest-${{ matrix.arch }}
+
+  docker-manifest:
+    needs: docker
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Docker manifests
+        run: |
+          version="${GITHUB_REF_NAME#cli-}"
+          image="ghcr.io/lukechilds/og-zkp"
+
+          docker manifest create "$image:$version" \
+            "$image:${version}-amd64" \
+            "$image:${version}-arm64"
+          docker manifest push "$image:$version"
+
+          docker manifest create "$image:latest" \
+            "$image:latest-amd64" \
+            "$image:latest-arm64"
+          docker manifest push "$image:latest"
 
   docker-verifier:
     needs: build-verifier
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            arch: amd64
+            os: ubuntu-24.04
+          - target: aarch64-unknown-linux-gnu
+            arch: arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download linux amd64 verifier binary
+      - name: Download linux verifier binary
         uses: actions/download-artifact@v4
         with:
-          name: og-zkp-verifier-x86_64-unknown-linux-gnu
+          name: og-zkp-verifier-${{ matrix.target }}
           path: dist/
 
       - name: Prepare binary
-        run: chmod +x dist/og-zkp-verifier-x86_64-unknown-linux-gnu
+        run: chmod +x dist/og-zkp-verifier-${{ matrix.target }}
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -177,14 +222,41 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image
-        run: ./build.sh docker-verifier
+        run: ./build.sh docker-verifier ${{ matrix.target }}
 
       - name: Push Docker image
         run: |
           version="${GITHUB_REF_NAME#cli-}"
-          docker tag ghcr.io/lukechilds/og-zkp-verifier:latest ghcr.io/lukechilds/og-zkp-verifier:$version
-          docker push ghcr.io/lukechilds/og-zkp-verifier:$version
-          docker push ghcr.io/lukechilds/og-zkp-verifier:latest
+          docker tag ghcr.io/lukechilds/og-zkp-verifier:latest ghcr.io/lukechilds/og-zkp-verifier:${version}-${{ matrix.arch }}
+          docker tag ghcr.io/lukechilds/og-zkp-verifier:latest ghcr.io/lukechilds/og-zkp-verifier:latest-${{ matrix.arch }}
+          docker push ghcr.io/lukechilds/og-zkp-verifier:${version}-${{ matrix.arch }}
+          docker push ghcr.io/lukechilds/og-zkp-verifier:latest-${{ matrix.arch }}
+
+  docker-verifier-manifest:
+    needs: docker-verifier
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Docker verifier manifests
+        run: |
+          version="${GITHUB_REF_NAME#cli-}"
+          image="ghcr.io/lukechilds/og-zkp-verifier"
+
+          docker manifest create "$image:$version" \
+            "$image:${version}-amd64" \
+            "$image:${version}-arm64"
+          docker manifest push "$image:$version"
+
+          docker manifest create "$image:latest" \
+            "$image:latest-amd64" \
+            "$image:latest-arm64"
+          docker manifest push "$image:latest"
 
   release:
     needs: [build, build-verifier]
